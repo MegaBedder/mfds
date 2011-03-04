@@ -1,12 +1,7 @@
 <?php
-	$ch = curl_init("http://www.example.com/");
-	$fp = fopen("test", "w");
-
-	var_dump($fp);
-	curl_setopt($ch, CURLOPT_FILE, $fp);
-	curl_setopt($ch, CURLOPT_HEADER, 0);
-
-	curl_exec($ch);
-	curl_close($ch);
-	fclose($fp);
+	
+	include "library/CurlDownloader.php";
+	
+	$cd = new CurlDownloader();
+	$cd->load("http://rapidshare.com","test.html");
 ?>
