@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>XMLHttpRequest in Mozilla</title>
+<title>Ajax-driven Engine ftw!!!</title>
 <script type="text/javascript">
 
 	var http = createRequestObject();
@@ -16,11 +16,17 @@
 		return objAjax;
 	}
 
-	function getNewContent(){
+	function getDlStatus() {
+		alert(42);
+		setTimeout('getDlStatus()',1000);
+	}
+
+
+	function activateDownload(){
 		var params = "link="+document.downloadForm.outputtext.value;
 		
 		http.open('POST','download.php');
-		http.onreadystatechange = updateNewContent;
+		http.onreadystatechange = refreshView;
 
 		//Send the proper header information along with the request
 		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -31,22 +37,23 @@
 		return false;
 	}
 
-	function updateNewContent(){
+	function refreshView(){
 		if(http.readyState == 4){
 			document.getElementById('mySentence').innerHTML = http.responseText;
+			getDlStatus();
 		}
 	}
 	
 
 </script>
-Ajax-driven Engine ftw!!!
+
 <form name="downloadForm">
 <table border="0" cellspacing="0" cellpadding="5">
 <tr>
 <td><textarea name="outputtext"></textarea></td>
 </tr>
 <tr>
-<td> <input type="button" value="Send request" onClick="getNewContent();"></p>
+<td> <input type="button" value="Send request" onClick="activateDownload();"></p>
 </tr>
 </table>
 </form>
