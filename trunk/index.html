@@ -4,7 +4,9 @@
 <script type="text/javascript">
 
 	var http = createRequestObject();
-
+	var dlStarted = false;
+	var dlID;
+	
 	function createRequestObject() {
 		var objAjax;
 		var browser = navigator.appName;
@@ -17,8 +19,19 @@
 	}
 
 	function getDlStatus() {
-		alert(42);
-		setTimeout('getDlStatus()',1000);
+		setTimeout('getDlStatus()',2000);
+		var params = "id="+dlID;
+		
+		http.open('POST','download.php');
+		http.onreadystatechange = refreshView;
+
+		//Send the proper header information along with the request
+		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		http.setRequestHeader("Content-length", params.length);
+		http.setRequestHeader("Connection", "close");
+
+		http.send(params);
+
 	}
 
 
@@ -40,7 +53,11 @@
 	function refreshView(){
 		if(http.readyState == 4){
 			document.getElementById('mySentence').innerHTML = http.responseText;
-			getDlStatus();
+			if(!dlStarted){
+				dlStarted = true;
+				dlID = http.responseText;
+				getDlStatus();
+			}
 		}
 	}
 	
