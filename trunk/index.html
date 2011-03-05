@@ -1,9 +1,62 @@
 <html>
-<body>
+<head>
+<title>XMLHttpRequest in Mozilla</title>
+<script type="text/javascript">
 
-<form action="index.php" method="post">
-Link: <input type="text" name="link" />
-<input type="submit" />
+	var http = createRequestObject();
+
+	function createRequestObject() {
+		var objAjax;
+		var browser = navigator.appName;
+		if(browser == "Microsoft Internet Explorer"){
+			objAjax = new ActiveXObject("Microsoft.XMLHTTP");
+		}else{
+			objAjax = new XMLHttpRequest();
+		}
+		return objAjax;
+	}
+
+	function getNewContent(){
+		var params = "link="+document.downloadForm.outputtext.value;
+		
+		http.open('POST','download.php');
+		http.onreadystatechange = updateNewContent;
+
+		//Send the proper header information along with the request
+		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		http.setRequestHeader("Content-length", params.length);
+		http.setRequestHeader("Connection", "close");
+
+		http.send(params);
+		return false;
+	}
+
+	function updateNewContent(){
+		if(http.readyState == 4){
+			document.getElementById('mySentence').innerHTML = http.responseText;
+		}
+	}
+	
+
+</script>
+Ajax-driven Engine ftw!!!
+<form name="downloadForm">
+<table border="0" cellspacing="0" cellpadding="5">
+<tr>
+<td><textarea name="outputtext"></textarea></td>
+</tr>
+<tr>
+<td> <input type="button" value="Send request" onClick="getNewContent();"></p>
+</tr>
+</table>
 </form>
+
+<p id="mySentence">
+</p>
+
+</head>
+<body>
+ <div id="Content"></div>
 </body>
 </html>
+
