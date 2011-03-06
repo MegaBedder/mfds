@@ -72,7 +72,7 @@
 			if($args[0] == 1){
 				die("fin "."1");
 			}
-			die("suc ".$downloadFinished);
+			die("suc ".$args[0]);
 		}
 	
 	}
