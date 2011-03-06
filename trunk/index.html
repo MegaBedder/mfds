@@ -19,7 +19,7 @@
 	}
 
 	function getDlStatus() {
-		setTimeout('getDlStatus()',500);
+		setTimeout('getDlStatus()',125);
 		var params = "id="+dlID;
 		
 		http.open('POST','download.php');
@@ -52,7 +52,13 @@
 
 	function refreshView(){
 		if(http.readyState == 4){
-			document.getElementById('mySentence').innerHTML = http.responseText;
+			var response = http.responseText;
+			var args = response.split(" ");
+			
+			if(args[0] == "suc"){
+				var progress = Math.round(args[1]*10000) / 100;
+				document.getElementById('mySentence').innerHTML = "Progress: "+progress+" %";
+			}
 			if(!dlStarted){
 				dlStarted = true;
 				dlID = http.responseText;

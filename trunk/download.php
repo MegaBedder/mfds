@@ -59,7 +59,7 @@
 			$globalID = $_POST["id"];
 			
 			startDownload($args[1]);
-			echo("init...");
+			echo("init");
 		}
 		else{
 			die("suc ".$args[0]);
@@ -92,15 +92,13 @@
 	function curlCallback($download_size, $downloaded, $upload_size, $uploaded){
 		global $globalID,$callcount;
 		
-		$callcount++;
-		$file = fopen("count", "w");
-		fwrite($file, $callcount);
-		fclose($file);
-		
 		$filename = "downloads/".$globalID.".dld";
 	
 		$file = fopen($filename, "w");
-		fwrite($file, $downloaded);
+	
+		if($download_size != 0)
+			fwrite($file, $downloaded/$download_size);
+	
 		fclose($file);
 
 	}
