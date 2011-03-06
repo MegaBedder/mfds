@@ -86,10 +86,7 @@
 				document.getElementById('mySentence').innerHTML = "Progress: "+progress+" %";
 			}
 			if(args[0] == "fin"){
-				var linkSplit = dlLink.split("/");
-				var link = linkSplit[linkSplit.length-1];
-				
-				document.getElementById('mySentence').innerHTML = "Finished: <a href="+link+">"+link+"</a>";
+				document.getElementById('mySentence').innerHTML = "Finished: <a href="+args[1]+">"+args[1]+"</a>";
 				dlFinished = true;
 			}
 			if(!dlStarted){

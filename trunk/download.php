@@ -1,8 +1,10 @@
 <?php 
 	define("ID_LENGTH",20);
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-	
+	define("TEMP_DIR", "temp/");
+	define("DOWNLOAD_DIR", "downloads/");
 	$globalID;
+	$dlLink;
 	
 	function createRandomFilename(){
 		$cs = CHAR_SPACE;
@@ -16,8 +18,10 @@
 	}
 
 	function createDwonloadId($link){
+		$dir = TEMP_DIR;
+		
 		$id = createRandomFilename();
-		$filename = "downloads/".$id.".dld";
+		$filename = $dir.$id.".dld";
 		$file = fopen($filename, "w");
 		fwrite($file,"init_req\n");
 		fwrite($file,$link);
@@ -36,17 +40,20 @@
 	}
 	
 	if(isset($_POST["id"]) && isset($_POST["fin"])){
-		$filename = "downloads/".$_POST["id"].".dld";
+		$dir = TEMP_DIR;
+
+		$filename = $dir.$_POST["id"].".dld";
 		unlink($filename);
 		return;
 	}
 
 
 	if(isset($_POST["id"])){
-		global $globalID,$downloadFinished;
+		global $globalID,$dlLink;
 		
+		$dir = TEMP_DIR;
 		
-		$filename = "downloads/".$_POST["id"].".dld";
+		$filename = $dir.$_POST["id"].".dld";
 		$file = fopen($filename, "r");
 
 		if(!$file) die("busy");		
@@ -70,7 +77,7 @@
 		}
 		else{
 			if($args[0] == 1){
-				die("fin "."1");
+				die("fin ".$args[1]);
 			}
 			die("suc ".$args[0]);
 		}
@@ -78,11 +85,15 @@
 	}
 	
 	function startDownload($link){ 
+		global $dlLink;
+		
 		$cache = preg_split("%/%",$link); //split url to get filename
 		$filename = $cache[count($cache)-1]; 
-			
+		$dir = DOWNLOAD_DIR; 	
+		
 		$curl = curl_init();
-		$file = fopen($filename, "w+");
+		$file = fopen($dir.$filename, "w+");
+		$dlLink = $dir.$filename; 
 			
 		curl_setopt ($curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -100,18 +111,19 @@
 	$callcount;
 	
 	function curlCallback($downloadSize, $downloaded, $uploadSize, $uploaded){
-		global $globalID;
-		
+		global $globalID,$dlLink;
 		set_time_limit(60);
-		$filename = "downloads/".$globalID.".dld";
-	
-		$file = fopen($filename, "w");
-	
-		if($downloadSize != 0)
-			fwrite($file, $downloaded/$downloadSize);
 		
-		fclose($file);
+		$dir = TEMP_DIR;
 		
+		$filename = $dir.$globalID.".dld";
+	
+	
+		if($downloadSize != 0){
+			$file = fopen($filename, "w");
+			fwrite($file, $downloaded/$downloadSize."\n".$dlLink);			
+			fclose($file);
+		}
 		
 	}
 
