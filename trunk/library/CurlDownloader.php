@@ -36,7 +36,7 @@
 			curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 			curl_setopt($curl,CURLOPT_NOPROGRESS,false);
 			//	curl_setopt($curl,CURLOPT_PROGRESSFUNCTION,'callback'); // no callback there
-			curl_setopt($curl, CURLOPT_BUFFERSIZE, 128);
+			curl_setopt($curl, CURLOPT_BUFFERSIZE, 1024);
 			curl_setopt($curl, CURLOPT_FILE,$file);
 			curl_setopt ($curl, CURLOPT_URL,$newlink);
 			curl_exec ($curl);

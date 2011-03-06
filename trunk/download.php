@@ -30,7 +30,7 @@
 		$id = createDwonloadId($_POST["link"]);
 
 		if(!$id) 
-			die("err");
+			die("error");
 		else
 			die($id);			
 	}
@@ -38,9 +38,16 @@
 	if(isset($_POST["id"])){
 		global $globalID;
 		
+		
 		$filename = "downloads/".$_POST["id"].".dld";
 		$file = fopen($filename, "r");
-		
+
+		if(!$file) die("busy");		
+
+		$fsize = filesize($filename);
+
+		if(!$fsize) die("busy");				
+
 		$args = split("\n", fread($file,filesize($filename)));
 		fclose($file);
 		
@@ -55,7 +62,7 @@
 			echo("init...");
 		}
 		else{
-			die($args[0]);
+			die("suc ".$args[0]);
 		}
 	
 	}
@@ -71,7 +78,7 @@
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($curl,CURLOPT_NOPROGRESS,false);
 		curl_setopt($curl,CURLOPT_PROGRESSFUNCTION,'curlCallback');
-		curl_setopt($curl, CURLOPT_BUFFERSIZE, 128);
+		curl_setopt($curl, CURLOPT_BUFFERSIZE, 262144);
 		curl_setopt($curl, CURLOPT_FILE,$file);
 		curl_setopt ($curl, CURLOPT_URL,$link);
 		curl_exec ($curl);
@@ -80,10 +87,16 @@
 
 	}
 	
+	$callcount;
 	
 	function curlCallback($download_size, $downloaded, $upload_size, $uploaded){
-		global $globalID;
-
+		global $globalID,$callcount;
+		
+		$callcount++;
+		$file = fopen("count", "w");
+		fwrite($file, $callcount);
+		fclose($file);
+		
 		$filename = "downloads/".$globalID.".dld";
 	
 		$file = fopen($filename, "w");
