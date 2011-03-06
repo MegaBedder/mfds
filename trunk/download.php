@@ -35,8 +35,15 @@
 			die($id);			
 	}
 	
+	if(isset($_POST["id"]) && isset($_POST["fin"])){
+		$filename = "downloads/".$_POST["id"].".dld";
+		unlink($filename);
+		return;
+	}
+
+
 	if(isset($_POST["id"])){
-		global $globalID;
+		global $globalID,$downloadFinished;
 		
 		
 		$filename = "downloads/".$_POST["id"].".dld";
@@ -59,10 +66,13 @@
 			$globalID = $_POST["id"];
 			
 			startDownload($args[1]);
-			echo("init");
+			die("init");
 		}
 		else{
-			die("suc ".$args[0]);
+			if($args[0] == 1){
+				die("fin "."1");
+			}
+			die("suc ".$downloadFinished);
 		}
 	
 	}
@@ -89,18 +99,20 @@
 	
 	$callcount;
 	
-	function curlCallback($download_size, $downloaded, $upload_size, $uploaded){
-		global $globalID,$callcount;
+	function curlCallback($downloadSize, $downloaded, $uploadSize, $uploaded){
+		global $globalID;
 		
+		set_time_limit(60);
 		$filename = "downloads/".$globalID.".dld";
 	
 		$file = fopen($filename, "w");
 	
-		if($download_size != 0)
-			fwrite($file, $downloaded/$download_size);
-	
+		if($downloadSize != 0)
+			fwrite($file, $downloaded/$downloadSize);
+		
 		fclose($file);
-
+		
+		
 	}
 
 ?> 

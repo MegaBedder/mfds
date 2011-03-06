@@ -5,6 +5,8 @@
 
 	var http = createRequestObject();
 	var dlStarted = false;
+	var dlFinished = false;
+	var dlLink;
 	var dlID;
 	
 	function createRequestObject() {
@@ -19,6 +21,11 @@
 	}
 
 	function getDlStatus() {
+		if(dlFinished) {
+			finishDownload();
+			return;
+		}
+		
 		setTimeout('getDlStatus()',125);
 		var params = "id="+dlID;
 		
@@ -36,7 +43,10 @@
 
 
 	function activateDownload(){
-		var params = "link="+document.downloadForm.outputtext.value;
+		document.downloadForm.submitButton.disabled = true;
+		
+		dlLink = document.downloadForm.outputtext.value;
+		var params = "link="+dlLink;
 		
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
@@ -49,6 +59,22 @@
 		http.send(params);
 		return false;
 	}
+	
+	function finishDownload(){
+		var params = "fin=1&id="+dlID;
+		
+		http.open('POST','download.php');
+		http.onreadystatechange = refreshView;
+
+		//Send the proper header information along with the request
+		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		http.setRequestHeader("Content-length", params.length);
+		http.setRequestHeader("Connection", "close");
+
+		http.send(params);
+	
+	
+	}
 
 	function refreshView(){
 		if(http.readyState == 4){
@@ -58,6 +84,13 @@
 			if(args[0] == "suc"){
 				var progress = Math.round(args[1]*10000) / 100;
 				document.getElementById('mySentence').innerHTML = "Progress: "+progress+" %";
+			}
+			if(args[0] == "fin"){
+				var linkSplit = dlLink.split("/");
+				var link = linkSplit[linkSplit.length-1];
+				
+				document.getElementById('mySentence').innerHTML = "Finished: <a href="+link+">"+link+"</a>";
+				dlFinished = true;
 			}
 			if(!dlStarted){
 				dlStarted = true;
@@ -76,7 +109,7 @@
 <td><textarea name="outputtext"></textarea></td>
 </tr>
 <tr>
-<td> <input type="button" value="Send request" onClick="activateDownload();"></p>
+<td> <input name="submitButton" type="button" value="Send request" onClick="activateDownload();"></p>
 </tr>
 </table>
 </form>
