@@ -5,9 +5,13 @@
 
 	var http = createRequestObject();
 	var dlStarted = false;
-	var dlFinished = false;
+	var dlComplete = false;
+	var dlAborted = false;
 	var dlLink;
 	var dlID;
+	var debug = true;
+	
+	document.downloadForm.linkinput.value = "rotnes.dk/catsen";
 	
 	function createRequestObject() {
 		var objAjax;
@@ -20,13 +24,18 @@
 		return objAjax;
 	}
 
-	function getDlStatus() {
-		if(dlFinished) {
-			finishDownload();
+	function sendStatusRequest() {
+		if(dlComplete) {
+			sendFinishRequest();
 			return;
 		}
 		
-		setTimeout('getDlStatus()',250);
+		if(dlAborted) {
+			cleanup();		
+			return;
+		}
+		
+		setTimeout('sendStatusRequest()',250);
 		var params = "id="+dlID;
 		
 		http.open('POST','download.php');
@@ -42,10 +51,10 @@
 	}
 
 
-	function activateDownload(){
+	function sendDownloadRequest(){
 		document.downloadForm.submitButton.disabled = true;
 		
-		dlLink = document.downloadForm.outputtext.value;
+		dlLink = document.downloadForm.linkinput.value;
 		var params = "link="+dlLink;
 		
 		http.open('POST','download.php');
@@ -60,7 +69,7 @@
 		return false;
 	}
 	
-	function finishDownload(){
+	function sendFinishRequest(){
 		var params = "fin=1&id="+dlID;
 		
 		http.open('POST','download.php');
@@ -76,46 +85,73 @@
 	
 	}
 
+	function sendAbortRequest(){
+		var params = "abort=1&id="+dlID;
+		
+		http.open('POST','download.php');
+		http.onreadystatechange = refreshView;
+
+		//Send the proper header information along with the request
+		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		http.setRequestHeader("Content-length", params.length);
+		http.setRequestHeader("Connection", "close");
+
+		http.send(params);
+	
+	}
+
 	function refreshView(){
 		if(http.readyState == 4){
 			var response = http.responseText;
 			var args = response.split(" ");
 			
+			//	if(debug) document.getElementById('debugText').innerHTML = response;	
+			
 			if(args[0] == "suc"){
 				var progress = Math.round(args[1]*10000) / 100;
-				document.getElementById('mySentence').innerHTML = "Progress: "+progress+" %";
+				document.getElementById('progressText').innerHTML = "Progress: "+progress+" %";
 			}
 			if(args[0] == "fin"){
-				document.getElementById('mySentence').innerHTML = "Finished: <a href="+args[1]+">"+args[1]+"</a>";
-				dlFinished = true;
+				document.getElementById('progressText').innerHTML = "Finished: <a href="+args[1]+">"+args[1]+"</a>";
+				dlComplete = true;
+			}
+			if(args[0] == "abort"){
+				dlAborted = true;
 			}
 			if(!dlStarted){
 				dlStarted = true;
 				dlID = http.responseText;
-				getDlStatus();
+				sendStatusRequest();
+				document.downloadForm.abortButton.disabled = false;
 			}
 		}
+	}
+	
+	function cleanup(){
+		document.downloadForm.submitButton.disabled = false;
+		document.downloadForm.abortButton.disabled = true;
+		document.getElementById('progressText').innerHTML = "";
 	}
 	
 
 </script>
 
 <form name="downloadForm">
+<input type="text" name="linkinput" value="rotnes.dk/carsten" size=40"></textarea>
 <table border="0" cellspacing="0" cellpadding="5">
 <tr>
-<td><textarea name="outputtext"></textarea></td>
-</tr>
-<tr>
-<td> <input name="submitButton" type="button" value="Send request" onClick="activateDownload();"></p>
+<td> <input name="submitButton" type="button" value="Send request" onClick="sendDownloadRequest();"></td>
+<td> <input name="abortButton" type="button" value="Abort" onClick="sendAbortRequest();" disabled="disabled"></td>
 </tr>
 </table>
 </form>
 
-<p id="mySentence">
-</p>
+<p id="progressText"> </p>
+<br><br>
 
 </head>
 <body>
+<p id="debugText"> </p>
  <div id="Content"></div>
 </body>
 </html>

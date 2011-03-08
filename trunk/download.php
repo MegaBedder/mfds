@@ -5,6 +5,8 @@
 	define("DOWNLOAD_DIR", "downloads/");
 	$globalID;
 	$dlLink;
+	$downloadingFile;
+	$downloadAborted = false;
 	
 	function createRandomFilename(){
 		$cs = CHAR_SPACE;
@@ -47,6 +49,20 @@
 		return;
 	}
 
+	if(isset($_POST["id"]) && isset($_POST["abort"])){
+		global $dlLink;
+
+		$dir = TEMP_DIR;
+		$filename = $dir.$_POST["id"].".dld";
+
+		while(!$file = fopen($filename, "w"));
+		
+		fwrite($file, "abort"."\n".$dlLink."\n");			
+		fclose($file);
+//		unlink($filename);
+		return;
+	}
+
 
 	if(isset($_POST["id"])){
 		global $globalID,$dlLink;
@@ -79,52 +95,81 @@
 			if($args[0] == 1){
 				die("fin ".$args[1]);
 			}
-			die("suc ".$args[0]);
+			if($args[0] == "abort"){
+				die("abort");
+			}
+			else 	die("suc ".$args[0]);
 		}
 	
 	}
 	
+
 	function startDownload($link){ 
-		global $dlLink;
+		global $dlLink,$downloadingFile;
 		
 		$cache = preg_split("%/%",$link); //split url to get filename
 		$filename = $cache[count($cache)-1]; 
 		$dir = DOWNLOAD_DIR; 	
 		
-		$curl = curl_init();
-		$file = fopen($dir.$filename, "w+");
+		$curlHandle = curl_init();
+		$downloadingFile = fopen($dir.$filename, "w+");
 		$dlLink = $dir.$filename; 
 			
-		curl_setopt ($curl, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl,CURLOPT_NOPROGRESS,false);
-		curl_setopt($curl,CURLOPT_PROGRESSFUNCTION,'curlCallback');
-		curl_setopt($curl, CURLOPT_BUFFERSIZE, 262144);
-		curl_setopt($curl, CURLOPT_FILE,$file);
-		curl_setopt ($curl, CURLOPT_URL,$link);
-		curl_exec ($curl);
+		curl_setopt ($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($curlHandle,CURLOPT_NOPROGRESS,false);
+		curl_setopt($curlHandle,CURLOPT_PROGRESSFUNCTION,'curlCallback');
+		curl_setopt($curlHandle, CURLOPT_BUFFERSIZE, 262144);
+		curl_setopt($curlHandle, CURLOPT_FILE,$downloadingFile);
+		curl_setopt ($curlHandle, CURLOPT_URL,$link);
+		
+		curl_exec ($curlHandle);
+		//curl_close($curlHandle);
 
-		fclose($file);
+		//fclose($file);
 
 	}
 	
 	$callcount;
 	
 	function curlCallback($downloadSize, $downloaded, $uploadSize, $uploaded){
-		global $globalID,$dlLink;
+		global $globalID,$dlLink,$downloadingFile,$downloadAborted;
 		set_time_limit(60);
 		
 		$dir = TEMP_DIR;
-		
 		$filename = $dir.$globalID.".dld";
-	
+		
+		$file = fopen($filename, "r");
+		$args = split("\n", fread($file,filesize($filename)));
+		fclose($file);
+				
+		if($args[0] == "abort"){
+			
+			if($downloadAborted) return;
+			
+			fclose($downloadingFile);
+			unlink($dlLink);
+			
+			$file = fopen($filename, "w");
+			fwrite($file, "abort");	
+			
+			$downloadAborted = true;
+			return;
+		}
 	
 		if($downloadSize != 0){
 			$file = fopen($filename, "w");
-			fwrite($file, $downloaded/$downloadSize."\n".$dlLink);			
+			fwrite($file, $downloaded/$downloadSize."\n".$dlLink."\n");			
 			fclose($file);
 		}
+
 		
+	}
+	
+	function closeHandle(){
+		global $curlHandle;
+		echo $sdas;
+		curl_close($curlHandle);
 	}
 
 ?> 
