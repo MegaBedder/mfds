@@ -23,6 +23,7 @@
 		}
 		return objAjax;
 	}
+	
 
 	function sendStatusRequest() {
 		if(dlComplete) {
@@ -31,12 +32,13 @@
 		}
 		
 		if(dlAborted) {
-			cleanup();		
+			setTimeout('resetForm()',500);
 			return;
 		}
 		
+		
 		setTimeout('sendStatusRequest()',250);
-		var params = "id="+dlID;
+		var params = "status=1&id="+dlID;
 		
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
@@ -55,7 +57,7 @@
 		document.downloadForm.submitButton.disabled = true;
 		
 		dlLink = document.downloadForm.linkinput.value;
-		var params = "link="+dlLink;
+		var params = "init=1&link="+dlLink;
 		
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
@@ -97,6 +99,8 @@
 		http.setRequestHeader("Connection", "close");
 
 		http.send(params);
+		
+		dlAborted = true;
 	
 	}
 
@@ -127,13 +131,14 @@
 		}
 	}
 	
-	function cleanup(){
+	function resetForm(){
 		document.downloadForm.submitButton.disabled = false;
 		document.downloadForm.abortButton.disabled = true;
 		document.getElementById('progressText').innerHTML = "";
 		dlStarted = false;
 		dlComplete = false;
 		dlAborted = false;
+		abortRequestSent = false;
 	}
 	
 

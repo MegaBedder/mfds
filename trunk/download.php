@@ -32,7 +32,7 @@
 		return $id;
 	}
 
-	if(isset($_POST["link"])){
+	if(isset($_POST["link"]) && isset($_POST["init"])){
 		$id = createDwonloadId($_POST["link"]);
 
 		if(!$id) 
@@ -59,13 +59,14 @@
 		
 		fwrite($file, "abort"."\n".$dlLink."\n");			
 		fclose($file);
-//		unlink($filename);
 		return;
 	}
 
 
-	if(isset($_POST["id"])){
-		global $globalID,$dlLink;
+	if(isset($_POST["id"]) && isset($_POST["status"])){
+		global $globalID,$dlLink,$downloadAborted;
+		
+		if($downloadAborted) die("busy");
 		
 		$dir = TEMP_DIR;
 		
@@ -136,6 +137,8 @@
 		global $globalID,$dlLink,$downloadingFile,$downloadAborted;
 		set_time_limit(60);
 		
+		if($downloadAborted) return;
+
 		$dir = TEMP_DIR;
 		$filename = $dir.$globalID.".dld";
 		
@@ -143,15 +146,10 @@
 		$args = split("\n", fread($file,filesize($filename)));
 		fclose($file);
 				
-		if($args[0] == "abort"){
-			
-			if($downloadAborted) return;
-			
+		if($args[0] == "abort"){			
 			fclose($downloadingFile);
 			unlink($dlLink);
-			
-			$file = fopen($filename, "w");
-			fwrite($file, "abort");	
+			unlink($filename);
 			
 			$downloadAborted = true;
 			return;
