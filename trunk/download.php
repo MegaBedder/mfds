@@ -7,6 +7,7 @@
 	$dlLink;
 	$downloadingFile;
 	$downloadAborted = false;
+	$curlHandle;
 	
 	function createRandomFilename(){
 		$cs = CHAR_SPACE;
@@ -106,7 +107,7 @@
 	
 
 	function startDownload($link){ 
-		global $dlLink,$downloadingFile;
+		global $dlLink,$downloadingFile,$curlHandle;
 		
 		$cache = preg_split("%/%",$link); //split url to get filename
 		$filename = $cache[count($cache)-1]; 
@@ -134,10 +135,12 @@
 	$callcount;
 	
 	function curlCallback($downloadSize, $downloaded, $uploadSize, $uploaded){
-		global $globalID,$dlLink,$downloadingFile,$downloadAborted;
+		global $globalID,$dlLink,$downloadingFile,$downloadAborted,$curlHandle;
 		set_time_limit(60);
 		
-		if($downloadAborted) return;
+		if($downloadAborted) {
+			die();
+		}
 
 		$dir = TEMP_DIR;
 		$filename = $dir.$globalID.".dld";
