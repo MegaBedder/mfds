@@ -26,8 +26,7 @@
 		$id = createRandomFilename();
 		$filename = $dir.$id.".dld";
 		$file = fopen($filename, "w");
-		fwrite($file,"init_req\n");
-		fwrite($file,$link);
+		fwrite($file,"init_req\n".$link);
 		fclose($file);
 
 		return $id;
@@ -39,7 +38,7 @@
 		if(!$id) 
 			die("error");
 		else
-			die($id);			
+			die("id"."@".$id."@".$_POST["link"]);			
 	}
 	
 	if(isset($_POST["id"]) && isset($_POST["fin"])){
@@ -64,45 +63,58 @@
 	}
 
 
-	if(isset($_POST["id"]) && isset($_POST["status"])){
+	if(isset($_POST["ids"]) && isset($_POST["status"])){
 		global $globalID,$dlLink,$downloadAborted;
+		
+		$ids = explode(",",$_POST["ids"]);
+		$dir = TEMP_DIR;	
+
+		$msg = "";
+
+		for($i=0; $i<count($ids); $i++){
+			$id = $ids[$i];
+			$filename = $dir.$id.".dld";
+			$file = fopen($filename, "r");
+			
+			if($i != 0) $msg .= "\n";
+
+			if(!$file) {
+				$msg .= "busy";
+				continue;
+			}
+
+			$fsize = filesize($filename);
+
+			if(!$fsize) {
+				$msg .= "busy";
+				continue;
+			}
+
+			$args = split("\n", fread($file,filesize($filename)));
+			fclose($file);
+		
+			if($args[0] == "init_req"){	
+				$globalID = $id;
+				startDownload($args[1]);
+				continue;
+				//die();
+			}
+			if($args[0] == 1){
+				$msg .= "fin"."@".$id."@".$args[1];
+				continue;
+			}
+			if($args[0] == "abort"){
+				$msg .= "abort";
+				continue;
+			}
+			else 	$msg .= "suc"."@".$id."@".$args[0];
+		
+			
+		}
 		
 		if($downloadAborted) die("busy");
 		
-		$dir = TEMP_DIR;
-		
-		$filename = $dir.$_POST["id"].".dld";
-		$file = fopen($filename, "r");
-
-		if(!$file) die("busy");		
-
-		$fsize = filesize($filename);
-
-		if(!$fsize) die("busy");				
-
-		$args = split("\n", fread($file,filesize($filename)));
-		fclose($file);
-		
-		if($args[0] == "init_req"){
-			$file = fopen($filename, "w");
-			fwrite($file, "0\n".$_POST["id"]);
-			fclose($file);
-			
-			$globalID = $_POST["id"];
-			
-			startDownload($args[1]);
-			die("init");
-		}
-		else{
-			if($args[0] == 1){
-				die("fin ".$args[1]);
-			}
-			if($args[0] == "abort"){
-				die("abort");
-			}
-			else 	die("suc ".$args[0]);
-		}
-	
+		die($msg);	
 	}
 	
 
@@ -126,9 +138,9 @@
 		curl_setopt ($curlHandle, CURLOPT_URL,$link);
 		
 		curl_exec ($curlHandle);
-		//curl_close($curlHandle);
+		curl_close($curlHandle);
 
-		//fclose($file);
+		fclose($file);
 
 	}
 	
@@ -167,10 +179,4 @@
 		
 	}
 	
-	function closeHandle(){
-		global $curlHandle;
-		echo $sdas;
-		curl_close($curlHandle);
-	}
-
 ?> 

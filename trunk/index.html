@@ -1,6 +1,11 @@
 <html>
 <head>
-<title>Ajax-driven Engine ftw!!!</title>
+<title>Multi-Filehoster-Leech</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+<script type="text/javascript" src="DownloadModel.js"></script>
 <script type="text/javascript">
 
 	var http = createRequestObject();
@@ -8,11 +13,21 @@
 	var dlComplete = false;
 	var dlAborted = false;
 	var dlLink;
-	var dlID;
+	//var downloads[0].id;
 	var debug = true;
 	
-	document.downloadForm.linkinput.value = "rotnes.dk/catsen";
+	var downloading = false;
+	var downloads = new Array();
 	
+	function addDownload(){
+		var link = document.downloadForm.linkinput.value;
+		downloads[downloads.length] = new DownloadModel(link);
+		downloads[downloads.length-1].progress = 0 ;
+		sendDownloadRequest(link);
+	}
+
+	
+
 	function createRequestObject() {
 		var objAjax;
 		var browser = navigator.appName;
@@ -25,21 +40,37 @@
 	}
 	
 
-	function sendStatusRequest() {
-		if(dlComplete) {
-			sendFinishRequest();
-			return;
+	function statusRequestLoop() {
+		for(var i=0; i<downloads.length; i++){	
+			var dl = downloads[i];
+			
+			if(dl.complete) {
+				sendFinishRequest();
+				return;
+			}
+		
+			if(dl.aborted) {
+				setTimeout('resetForm()',1000);
+				return;
+			}
+		
 		}
 		
-		if(dlAborted) {
-			setTimeout('resetForm()',500);
-			return;
+				
+		setTimeout('statusRequestLoop()',500);
+		var params = "status=1&ids=";
+		
+		for(var i=0; i<downloads.length; i++){
+			var dl = downloads[i]
+			params += dl.id;
+			if(i != downloads.length-1) params += ",";
 		}
-		
-		
-		setTimeout('sendStatusRequest()',250);
-		var params = "status=1&id="+dlID;
-		
+
+
+		//if(downloads.length < 1 && i == 0) continue;
+		 
+		//var params = "status=1&id="+downloads[i].id;
+
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
 
@@ -49,15 +80,13 @@
 		http.setRequestHeader("Connection", "close");
 
 		http.send(params);
-
 	}
 
 
-	function sendDownloadRequest(){
-		document.downloadForm.submitButton.disabled = true;
+	function sendDownloadRequest(link){
+		//document.downloadForm.submitButton.disabled = true;
 		
-		dlLink = document.downloadForm.linkinput.value;
-		var params = "init=1&link="+dlLink;
+		var params = "init=1&link="+link;
 		
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
@@ -72,7 +101,7 @@
 	}
 	
 	function sendFinishRequest(){
-		var params = "fin=1&id="+dlID;
+		var params = "fin=1&id="+downloads[0].id;
 		
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
@@ -88,7 +117,7 @@
 	}
 
 	function sendAbortRequest(){
-		var params = "abort=1&id="+dlID;
+		var params = "abort=1&id="+downloads[0].id;
 		
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
@@ -107,30 +136,64 @@
 	function refreshView(){
 		if(http.readyState == 4){
 			var response = http.responseText;
-			var args = response.split(" ");
+			var msgs = response.split("\n");
 			
-			//	if(debug) document.getElementById('debugText').innerHTML = response;	
+
+
+			for(var i=0; i<msgs.length; i++){
+				var args = msgs[i].split("@");
 			
-			if(args[0] == "suc"){
-				var progress = Math.round(args[1]*10000) / 100;
-				document.getElementById('progressText').innerHTML = "Progress: "+progress+" %";
+				// if(debug) document.getElementById('debugText').innerHTML = response;	
+				//document.write(msgs[i]);
+				
+				if(args[0] == "suc"){
+					for(var j=0; j<downloads.length; j++){	
+						dl=downloads[j];
+						if(args[1] == dl.id){
+							dl.progress =  Math.round(args[2]*10000) / 100; 
+						}
+					}
+				}
+				
+				
+
+				
+				if(args[0] == "fin"){
+					dlComplete = true;
+				}
+				if(args[0] == "abort"){
+					dlAborted = true;
+				}
+				if(args[0] == "id"){
+					for(var i=0; i<downloads.length; i++){
+						var dl = downloads[i];
+						if(dl.link == args[2]){
+							downloads[i].id = args[1];
+							if(!downloading) {
+								downloading = true;
+								statusRequestLoop();
+							}
+							//document.downloadForm.abortButton.disabled = false;
+						}
+					}
+				}
 			}
-			if(args[0] == "fin"){
-				document.getElementById('progressText').innerHTML = "Finished: <a href="+args[1]+">"+args[1]+"</a>";
-				dlComplete = true;
-			}
-			if(args[0] == "abort"){
-				dlAborted = true;
-			}
-			if(!dlStarted){
-				dlStarted = true;
-				dlID = http.responseText;
-				sendStatusRequest();
-				document.downloadForm.abortButton.disabled = false;
-			}
+			
+			displayTable();
 		}
 	}
 	
+	function displayTable(){
+		 var table = "<table style='color:#d52908'>";
+		
+		for(var i=0; i<downloads.length; i++){
+			table += "<tr><td>"+downloads[i].link+"</td><td>  - - - - - - - - - - - - -  </td><td>"+downloads[i].progress+" %</td></tr>";
+		}
+		
+		table += "</table>";
+		document.getElementById('activeDownloadsTableContent').innerHTML = table;
+	}
+		
 	function resetForm(){
 		document.downloadForm.submitButton.disabled = false;
 		document.downloadForm.abortButton.disabled = true;
@@ -144,23 +207,32 @@
 
 </script>
 
-<form name="downloadForm">
-<input type="text" name="linkinput" value="rotnes.dk/carsten" size=40"></textarea>
+<p id="debugText"> </p>
+<div id="Content" style="padding:0px 15px;">
+
+<p id="progressText1"> </p>
+<br>
+<div id="activeDownloadsTableHead">
+<p style="margin-top:4px; margin-left:8px;"> ActiveDownloads: </p>
+</div>
+<div id="activeDownloadsTable">
+<div id="activeDownloadsTableContent"></div>
+</div>
+<form style="margin-top:15px;" name="downloadForm">
+<input type="text" name="linkinput" value="rotnes.dk/carsten" size="40"></textarea>
 <table border="0" cellspacing="0" cellpadding="5">
 <tr>
-<td> <input name="submitButton" type="button" value="Send request" onClick="sendDownloadRequest();"></td>
-<td> <input name="abortButton" type="button" value="Abort" onClick="sendAbortRequest();" disabled="disabled"></td>
+<td> <input name="submitButton" type="button" value="Send request" onClick="addDownload();"></td>
+<td> <input name="abortButton" type="button" value="Abort" onClick="abortDownload();" disabled="disabled"></td>
 </tr>
 </table>
 </form>
 
-<p id="progressText"> </p>
-<br><br>
 
-</head>
-<body>
-<p id="debugText"> </p>
- <div id="Content"></div>
+<p id="progressText2"> </p>
+
+
 </body>
+</div>
 </html>
 
