@@ -17,7 +17,7 @@
 	var debug = true;
 	
 	var downloading = false;
-	var downloads = new Array();
+	var activeDownload = null;
 	var queue = new Array();
 	var finishedDownloads = new Array();
 	
@@ -27,13 +27,12 @@
 		var dl = new DownloadModel(link);
 		dl.progress = 0 ;
 		
-		if(downloads.length == 0) {
-			downloads[downloads.length] = dl;
+		if(activeDownload == null) {
+			activeDownload = dl;
 			sendDownloadRequest(link);
 		}
 		else{
 			queue.push(dl);
-		
 		}
 	}
 
@@ -52,42 +51,31 @@
 	
 
 	function statusRequestLoop() {
-		for(var i=0; i<downloads.length; i++){	
-			var dl = downloads[i];
-			
-			if(dl.complete) {
-				sendFinishRequest();
-				var tmp = downloads.splice(i,1);
-				finishedDownloads.push(tmp[0])
-				if(queue.length != 0){
-					downloads[0] = queue.shift();
-					sendDownloadRequest(downloads[0].link);
-				}
+		if(activeDownload.complete) {
+			sendFinishRequest();
+			finishedDownloads.push(activeDownload);
+
+			if(queue.length != 0){
+				activeDownload = queue.shift();
+				sendDownloadRequest(activeDownload.link);
 				return;
 			}
-		
-			if(dl.aborted) {
-				setTimeout('resetForm()',1000);
+			else{
+				activeDownload = null;
 				return;
 			}
-		
 		}
+	
+		if(activeDownload.aborted) {
+			setTimeout('resetForm()',1000);
+			return;
+		}
+	
 		
 				
 		setTimeout('statusRequestLoop()',500);
-		var params = "status=1&ids=";
+		var params = "status=1&id="+activeDownload.id;
 		
-		for(var i=0; i<downloads.length; i++){
-			var dl = downloads[i]
-			params += dl.id;
-			if(i != downloads.length-1) params += ",";
-		}
-
-
-		//if(downloads.length < 1 && i == 0) continue;
-		 
-		//var params = "status=1&id="+downloads[i].id;
-
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
 
@@ -102,7 +90,6 @@
 
 	function sendDownloadRequest(link){
 		//document.downloadForm.submitButton.disabled = true;
-
 		var params = "init=1&link="+link;
 		
 		http.open('POST','download.php');
@@ -114,11 +101,12 @@
 		http.setRequestHeader("Connection", "close");
 
 		http.send(params);
+
 		return false;
 	}
 	
 	function sendFinishRequest(){
-		var params = "fin=1&id="+downloads[0].id;
+		var params = "fin=1&id="+activeDownload.id;
 		
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
@@ -134,7 +122,7 @@
 	}
 
 	function sendAbortRequest(){
-		var params = "abort=1&id="+downloads[0].id;
+		var params = "abort=1&id="+activeDownload.id;
 		
 		http.open('POST','download.php');
 		http.onreadystatechange = refreshView;
@@ -153,49 +141,25 @@
 	function refreshView(){
 		if(http.readyState == 4){
 			var response = http.responseText;
-			var msgs = response.split("\n");
+			var args = response.split("@");
+			// if(debug) document.getElementById('debugText').innerHTML = response;	
+			//document.write(msgs[i]);
 			
-
-
-			for(var i=0; i<msgs.length; i++){
-				var args = msgs[i].split("@");
+			if(args[0] == "suc"){
+				activeDownload.progress =  Math.round(args[2]*10000) / 100; 
+			}			
 			
-				// if(debug) document.getElementById('debugText').innerHTML = response;	
-				//document.write(msgs[i]);
-				
-				if(args[0] == "suc"){
-					for(var j=0; j<downloads.length; j++){	
-						dl=downloads[j];
-						if(args[1] == dl.id){
-							dl.progress =  Math.round(args[2]*10000) / 100; 
-						}
-					}
-				}
-				
-				if(args[0] == "fin"){
-					for(var j=0; j<downloads.length; j++){	
-						dl=downloads[j];
-						if(args[1] == dl.id){
-							dl.progress = 100;
-							dl.link = args[2];
-							dl.complete = true 
-						}
-					}
-				}
-				if(args[0] == "abort"){
-					dlAborted = true;
-				}
-				if(args[0] == "id"){
-					alert(args[1]);
-
-					for(var i=0; i<downloads.length; i++){
-						var dl = downloads[i];
-						if(dl.link == args[2]){
-							downloads[i].id = args[1];
-							statusRequestLoop();
-						}
-					}
-				}
+			if(args[0] == "fin"){
+				activeDownload.progress = 100;
+				activeDownload.link = args[2];
+				activeDownload.complete = true 
+			}
+			if(args[0] == "abort"){
+				dlAborted = true;
+			}
+			if(args[0] == "id"){
+				activeDownload.id = args[1];
+				statusRequestLoop();
 			}
 			
 			displayTable();
@@ -205,9 +169,8 @@
 	function displayTable(){
 		 var table = "<table style='color:#d52908'>";
 		
-		for(var i=0; i<downloads.length; i++){
-			table += "<tr><td>"+downloads[i].link+"</td><td> (</td><td>"+downloads[i].progress+" % )</td></tr>";
-		}
+		if(activeDownload != null)
+			table += "<tr><td>"+activeDownload.link+"</td><td> (</td><td>"+activeDownload.progress+" % )</td></tr>";
 
 		for(var i=0; i<queue.length; i++){
 			table += "<tr><td>"+queue[i].link+"</td><td> (</td><td> queued)</td></tr>";
