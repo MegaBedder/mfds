@@ -18,12 +18,23 @@
 	
 	var downloading = false;
 	var downloads = new Array();
+	var queue = new Array();
+	var finishedDownloads = new Array();
+	
 	
 	function addDownload(){
 		var link = document.downloadForm.linkinput.value;
-		downloads[downloads.length] = new DownloadModel(link);
-		downloads[downloads.length-1].progress = 0 ;
-		sendDownloadRequest(link);
+		var dl = new DownloadModel(link);
+		dl.progress = 0 ;
+		
+		if(downloads.length == 0) {
+			downloads[downloads.length] = dl;
+			sendDownloadRequest(link);
+		}
+		else{
+			queue.push(dl);
+		
+		}
 	}
 
 	
@@ -46,6 +57,12 @@
 			
 			if(dl.complete) {
 				sendFinishRequest();
+				var tmp = downloads.splice(i,1);
+				finishedDownloads.push(tmp[0])
+				if(queue.length != 0){
+					downloads[0] = queue.shift();
+					sendDownloadRequest(downloads[0].link);
+				}
 				return;
 			}
 		
@@ -85,7 +102,7 @@
 
 	function sendDownloadRequest(link){
 		//document.downloadForm.submitButton.disabled = true;
-		
+
 		var params = "init=1&link="+link;
 		
 		http.open('POST','download.php');
@@ -112,7 +129,7 @@
 		http.setRequestHeader("Connection", "close");
 
 		http.send(params);
-	
+		
 	
 	}
 
@@ -155,25 +172,27 @@
 					}
 				}
 				
-				
-
-				
 				if(args[0] == "fin"){
-					dlComplete = true;
+					for(var j=0; j<downloads.length; j++){	
+						dl=downloads[j];
+						if(args[1] == dl.id){
+							dl.progress = 100;
+							dl.link = args[2];
+							dl.complete = true 
+						}
+					}
 				}
 				if(args[0] == "abort"){
 					dlAborted = true;
 				}
 				if(args[0] == "id"){
+					alert(args[1]);
+
 					for(var i=0; i<downloads.length; i++){
 						var dl = downloads[i];
 						if(dl.link == args[2]){
 							downloads[i].id = args[1];
-							if(!downloading) {
-								downloading = true;
-								statusRequestLoop();
-							}
-							//document.downloadForm.abortButton.disabled = false;
+							statusRequestLoop();
 						}
 					}
 				}
@@ -187,7 +206,15 @@
 		 var table = "<table style='color:#d52908'>";
 		
 		for(var i=0; i<downloads.length; i++){
-			table += "<tr><td>"+downloads[i].link+"</td><td>  - - - - - - - - - - - - -  </td><td>"+downloads[i].progress+" %</td></tr>";
+			table += "<tr><td>"+downloads[i].link+"</td><td> (</td><td>"+downloads[i].progress+" % )</td></tr>";
+		}
+
+		for(var i=0; i<queue.length; i++){
+			table += "<tr><td>"+queue[i].link+"</td><td> (</td><td> queued)</td></tr>";
+		}
+
+		for(var i=0; i<finishedDownloads.length; i++){
+			table += "<tr><td><a href='"+finishedDownloads[i].link+"'>"+finishedDownloads[i].link+"</a></td><td>  (</td><td>finished)</td></tr>";
 		}
 		
 		table += "</table>";
