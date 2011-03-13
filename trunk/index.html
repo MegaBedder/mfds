@@ -23,10 +23,9 @@
 	
 	
 	function addDownload(){
-		var link = document.downloadForm.linkinput.value;
+		var link = document.getElementById("linkinput").value;
 		var dl = new DownloadModel(link);
 		dl.progress = 0 ;
-		
 		if(activeDownload == null) {
 			activeDownload = dl;
 			sendDownloadRequest(link);
@@ -58,17 +57,28 @@
 			if(queue.length != 0){
 				activeDownload = queue.shift();
 				sendDownloadRequest(activeDownload.link);
+				displayTable();
 				return;
 			}
 			else{
 				activeDownload = null;
+				displayTable();
 				return;
 			}
 		}
 	
 		if(activeDownload.aborted) {
-			setTimeout('resetForm()',1000);
-			return;
+			if(queue.length != 0){
+				activeDownload = queue.shift();
+				sendDownloadRequest(activeDownload.link);
+				displayTable();
+				return;
+			}
+			else{
+				activeDownload = null;
+				displayTable();
+				return;
+			}
 		}
 	
 		
@@ -102,7 +112,7 @@
 
 		http.send(params);
 
-		return false;
+	//	return false;
 	}
 	
 	function sendFinishRequest(){
@@ -155,7 +165,8 @@
 				activeDownload.complete = true 
 			}
 			if(args[0] == "abort"){
-				dlAborted = true;
+				activeDownload.aborted = true;
+				return;
 			}
 			if(args[0] == "id"){
 				activeDownload.id = args[1];
@@ -166,21 +177,68 @@
 		}
 	}
 	
-	function displayTable(){
-		 var table = "<table style='color:#d52908'>";
+	function selectAll(){
+		var selectCount = 0;
 		
-		if(activeDownload != null)
-			table += "<tr><td>"+activeDownload.link+"</td><td> (</td><td>"+activeDownload.progress+" % )</td></tr>";
-
+		if(activeDownload == null && queue.length == 0)	return;
+		
+		if(activeDownload.selected) selectCount++; 
+		activeDownload.selected= true;
+		
 		for(var i=0; i<queue.length; i++){
-			table += "<tr><td>"+queue[i].link+"</td><td> (</td><td> queued)</td></tr>";
+			if(queue[i].selected) selectCount++; 
+			queue[i].selected = true;
+		}
+		
+		if(selectCount == queue.length+1){
+			activeDownload.selected = false;
+			for(var i=0; i<queue.length; i++) queue[i].selected = false;
+		}
+		
+		displayTable();
+	}
+	
+	function displayTable(){
+		if(activeDownload == null && queue.length == 0 && finishedDownloads.length == 0){
+			document.getElementById('activeDownloadsTableContent').innerHTML = "Nothing to do...";
+			return;
+		}
+		var table = "<form name='statusForm'><table style='color:#FFFFFF'><tr style='color:#FFFFFF;'><td width=70>";
+		table += "<center><button type='button' onmousedown='selectAll();'> All</button></center></td><td width=300>File:</td><td>Progress:</td>";
+		var selected = "" ;
+		
+		if(activeDownload != null){
+			if(activeDownload.selected) selected="checked";
+			else selected="";
+			
+			table += "<tr style='background-color:#4c4f4a'><td><div onmousedown='activeDownload.selected = !activeDownload.selected;'>";
+			table += "<center><input type='checkbox'"+selected+"></center>"
+			table += "<td>"+activeDownload.link+"</td><td>"+activeDownload.progress+" %</td></tr>";
+		}
+		for(var i=0; i<queue.length; i++){
+			if(queue[i].selected) selected="checked";
+			else selected="";
+		
+			var trstyle;
+			if(i % 2 != 0) trstyle = "style='background-color:#4c4f4a;'";
+			else trstyle = "";
+			
+			table += "<tr "+trstyle+"<td><div onmousedown='queue["+i+"].selected = !queue["+i+"].selected;'>";
+			table += "<center><input type='checkbox'"+selected+"></center></div><td>"+queue[i].link+"</td><td style='color:#cdb21d;'>pending...</td></tr>";
 		}
 
 		for(var i=0; i<finishedDownloads.length; i++){
-			table += "<tr><td><a href='"+finishedDownloads[i].link+"'>"+finishedDownloads[i].link+"</a></td><td>  (</td><td>finished)</td></tr>";
+			var trstyle;
+			var offset = 0;
+			if(activeDownload != null) offset = 1;
+			
+			if((i+queue.length+offset-1) % 2 != 0) trstyle = "style='background-color:#4c4f4a;'";
+			else trstyle = "";
+
+			table += "<tr "+trstyle+"><td></td><td><a href='"+finishedDownloads[i].link+"'>"+finishedDownloads[i].link+"</a></td><td style='color:#66bd10;'>finished</td></tr>";
 		}
 		
-		table += "</table>";
+		table += "</table></form>";
 		document.getElementById('activeDownloadsTableContent').innerHTML = table;
 	}
 		
@@ -194,6 +252,28 @@
 		abortRequestSent = false;
 	}
 	
+	function abortDownloads(){
+		var selectCount = 0;
+		
+		if(activeDownload.selected){
+			selectCount++;
+			sendAbortRequest();
+		}
+		
+		for(var i=0; i<queue.length; i++){
+			if(queue[i].selected){ 
+				selectCount++;
+				queue.splice(i,1);
+				i--;
+			}
+			
+		}
+		
+		if(!selectCount) alert("What to abort?");
+	}
+	
+
+	
 
 </script>
 
@@ -206,21 +286,20 @@
 <p style="margin-top:4px; margin-left:8px;"> ActiveDownloads: </p>
 </div>
 <div id="activeDownloadsTable">
-<div id="activeDownloadsTableContent" style="padding-left:8px; padding-top:4px;"></div>
+<div id="activeDownloadsTableContent" style="padding-left:16px; padding-top:8px;">
+No downloads added yet...
 </div>
-<form style="margin-top:15px;" name="downloadForm">
-<input type="text" name="linkinput" value="rotnes.dk/carsten" size="40"></textarea>
-<table border="0" cellspacing="0" cellpadding="5">
+</div>
+<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="rotnes.dk/carsten" size="40">
+
+<table border="0">
 <tr>
-<td> <input name="submitButton" type="button" value="Send request" onClick="addDownload();"></td>
-<td> <input name="abortButton" type="button" value="Abort" onClick="abortDownload();" disabled="disabled"></td>
+<td> <button id="submitButton" onClick="addDownload();">Send request</button> </td>
+<td> <button name="abortButton" onClick="abortDownloads();" >Abort</button></td>
 </tr>
 </table>
-</form>
-
 
 <p id="progressText2"> </p>
-
 
 </body>
 </div>

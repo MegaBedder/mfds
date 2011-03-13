@@ -1,10 +1,17 @@
 body{
-	background-color:#444444;
+	background-color:#383a36;
+	color: #FFFFFF;
 }
+
+a{
+	color:#FFFFFF;
+}
+
+
 #activeDownloadsTableHead{
-	width:400px; 
+	width:800px; 
 	height:40px; 
-	background-color:#444444;
+	background-color:#383a36;
 	border-style:solid; 
 	border-bottom-style:none; 
 	border-width:1px;
@@ -12,9 +19,9 @@ body{
 }
 
 #activeDownloadsTable{
-	width:400px; 
-	height:300px; 
-	background-color:#444444;
+	width:800px; 
+	height:600px; 
+	background-color:#383a36;
 	overflow:auto; 
 	border-style:solid; 
 	border-width:1px;

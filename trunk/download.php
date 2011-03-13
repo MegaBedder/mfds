@@ -59,7 +59,7 @@
 		
 		fwrite($file, "abort"."\n".$dlLink."\n");			
 		fclose($file);
-		return;
+		die("abort");
 	}
 
 

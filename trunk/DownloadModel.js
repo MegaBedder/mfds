@@ -5,6 +5,7 @@ function DownloadModel(link){
 	this.progress = 1;
 	this.link = link;
 	this.ID;
+	this.selected = false;
 }
 
 
