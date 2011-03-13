@@ -204,7 +204,7 @@
 			return;
 		}
 		var table = "<form name='statusForm'><table style='color:#FFFFFF'><tr style='color:#FFFFFF;'><td width=70>";
-		table += "<center><button type='button' onmousedown='selectAll();'> All</button></center></td><td width=300>File:</td><td>Progress:</td>";
+		table += "<center><button type='button' onmousedown='selectAll();'> All</button></center></td><td width=608>File:</td><td>Progress:</td>";
 		var selected = "" ;
 		
 		if(activeDownload != null){
@@ -255,6 +255,7 @@
 	function abortDownloads(){
 		var selectCount = 0;
 		
+		
 		if(activeDownload.selected){
 			selectCount++;
 			sendAbortRequest();
@@ -292,7 +293,7 @@ No downloads added yet...
 </div>
 <br>
 
-<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="rotnes.dk/carsten" size="40">
+<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="http://uploaded.to/file/km5mr0" size="40">
 <table border="0">
 <tr>
 <td> <button id="submitButton" onClick="addDownload();">Send request</button> </td>

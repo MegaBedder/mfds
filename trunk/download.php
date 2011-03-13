@@ -1,13 +1,16 @@
 <?php 
+
+
+	include("library/ul.php");
+
 	define("ID_LENGTH",20);
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 	define("TEMP_DIR", "temp/");
 	define("DOWNLOAD_DIR", "downloads/");
 	$globalID;
 	$dlLink;
-	$downloadingFile;
+	$dlFile;
 	$downloadAborted = false;
-	$curlHandle;
 	
 	function createRandomFilename(){
 		$cs = CHAR_SPACE;
@@ -98,58 +101,71 @@
 			
 		if($downloadAborted) die("busy");
 		
-		die($msg);	
+		die();	
 	}
 	
 
 	function startDownload($link){ 
-		global $dlLink,$downloadingFile,$curlHandle;
+		global $dlLink,$dlFile;
 		
-		$cache = preg_split("%/%",$link); //split url to get filename
-		$filename = $cache[count($cache)-1]; 
 		$dir = DOWNLOAD_DIR; 	
 		
-		$curlHandle = curl_init();
-		$downloadingFile = fopen($dir.$filename, "w+");
-		$dlLink = $dir.$filename; 
-			
-		curl_setopt ($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curlHandle,CURLOPT_NOPROGRESS,false);
-		curl_setopt($curlHandle,CURLOPT_PROGRESSFUNCTION,'curlCallback');
-		curl_setopt($curlHandle, CURLOPT_BUFFERSIZE, 262144);
-		curl_setopt($curlHandle, CURLOPT_FILE,$downloadingFile);
-		curl_setopt ($curlHandle, CURLOPT_URL,$link);
 		
-		curl_exec ($curlHandle);
-		curl_close($curlHandle);
+		if(strpos($link,"uploaded.to") || strpos($link,"ul.to")){
+			$dlFilename = ul_getDlFilename($link);
+			$cookiefile = ul_fetchCookieFile();
+		
+			$dlFile = fopen($dir.$dlFilename, "w");
+			$dlLink = $dir.$dlFilename; 
+		
+			ul_load($dlFile,$link,$dlFilename,$cookiefile);
+			fclose($dlFile);
+		}		
+		else{
+			
+			$cache = preg_split("%/%",$link); //split url to get filename
+			$filename = $cache[count($cache)-1]; 
+			$dir = DOWNLOAD_DIR; 	
+		
+			$curlHandle = curl_init();
+			$dlFile = fopen($dir.$filename, "w+");
+			$dlLink = $dir.$filename; 
+			
+			curl_setopt ($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
+			curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($curlHandle,CURLOPT_NOPROGRESS,false);
+			curl_setopt($curlHandle,CURLOPT_PROGRESSFUNCTION,'curlCallback');
+			curl_setopt($curlHandle, CURLOPT_BUFFERSIZE, 262144);
+			curl_setopt($curlHandle, CURLOPT_FILE,$dlFile);
+			curl_setopt ($curlHandle, CURLOPT_URL,$link);
+		
+			curl_exec ($curlHandle);
+			curl_close($curlHandle);
 
-		fclose($downloadingFile);
-
+			fclose($dlFile);
+		}
 	}
 	
 	$callcount;
 	
 	function curlCallback($downloadSize, $downloaded, $uploadSize, $uploaded){
-		global $globalID,$dlLink,$downloadingFile,$downloadAborted,$curlHandle;
+		global $globalID,$dlLink,$dlFile,$test;
 		set_time_limit(60);
 		
-		if($downloadAborted) {
-			die();
-		}
-
 		$dir = TEMP_DIR;
 		$filename = $dir.$globalID.".dld";
+		
+		if(!file_exists($filename)) return;
 		
 		$file = fopen($filename, "r");
 		$args = split("\n", fread($file,filesize($filename)));
 		fclose($file);
 				
 		if($args[0] == "abort"){			
-			fclose($downloadingFile);
+			fclose($dlFile);
 			unlink($dlLink);
 			unlink($filename);
-			
+				
 			$downloadAborted = true;
 			return;
 		}
@@ -159,8 +175,7 @@
 			fwrite($file, $downloaded/$downloadSize."\n".$dlLink."\n");			
 			fclose($file);
 		}
-
-		
 	}
 	
+
 ?> 
