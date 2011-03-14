@@ -253,24 +253,18 @@
 	}
 	
 	function abortDownloads(){
-		var selectCount = 0;
-		
-		
 		if(activeDownload.selected){
-			selectCount++;
 			sendAbortRequest();
 		}
 		
 		for(var i=0; i<queue.length; i++){
 			if(queue[i].selected){ 
-				selectCount++;
 				queue.splice(i,1);
 				i--;
 			}
 			
 		}
 		
-		if(!selectCount) alert("What to abort?");
 	}
 	
 
@@ -293,7 +287,7 @@ No downloads added yet...
 </div>
 <br>
 
-<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="http://uploaded.to/file/km5mr0" size="40">
+<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="http://ul.to/7gz616" size="40">
 <table border="0">
 <tr>
 <td> <button id="submitButton" onClick="addDownload();">Send request</button> </td>

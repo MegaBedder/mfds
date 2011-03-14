@@ -1,7 +1,5 @@
 <?php
-	//$input = "http://uploaded.to/file/km5mr0";
-	$cookieFolder = "cookies/";
-	//include("curlCallback.php");
+	// testLink "http://uploaded.to/file/km5mr0";
 
 	function ul_fetchCookieFile(){
 		global $cookieFolder;
@@ -40,22 +38,9 @@
 		return substr($tmp[0],0,strlen($tmp[0])-1);;
 	}
 	
-	$test;
 	
 	function ul_load($dlFile,$dlLink,$dlFilename,$cookiefile)
 	{
-		global $test;
-		
-		$test = 1;
-	//	$cookiefile = (ul_fetchCookieFile($input));
-	//	$dlFilename = ul_getDlFilename($input);
-	//	$downloadingFile = fopen($dlFilename,"w");
-	
-			
-	//	$f = fopen("test.est","w");
-	//	fwrite($f,$dlFile.$dlLink.$dlFilename.$cookiefile);
-	//	fclose($f);	
-
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -69,16 +54,4 @@
 		curl_close($curl);
 		die();
 	}
-	
-		
-	function foo(){
-		global $test;
-		$f = fopen("test.est","w");
-		fwrite($f,$test);
-		fclose($f);
-	}
-	
-	
-	
-	
 ?>

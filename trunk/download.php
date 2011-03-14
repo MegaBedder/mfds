@@ -1,14 +1,13 @@
 <?php 
-
-
 	include("library/ul.php");
+	include("library/rs.php");
 
 	define("ID_LENGTH",20);
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 	define("TEMP_DIR", "temp/");
 	define("DOWNLOAD_DIR", "downloads/");
 	$globalID;
-	$dlLink;
+	$userLink;
 	$dlFile;
 	$downloadAborted = false;
 	
@@ -53,21 +52,21 @@
 	}
 
 	if(isset($_POST["id"]) && isset($_POST["abort"])){
-		global $dlLink;
+		global $userLink;
 
 		$dir = TEMP_DIR;
 		$filename = $dir.$_POST["id"].".dld";
 
 		while(!$file = fopen($filename, "w"));
 		
-		fwrite($file, "abort"."\n".$dlLink."\n");			
+		fwrite($file, "abort"."\n".$userLink."\n");			
 		fclose($file);
 		die("abort");
 	}
 
 
 	if(isset($_POST["id"]) && isset($_POST["status"])){
-		global $globalID,$dlLink,$downloadAborted;
+		global $globalID,$userLink,$downloadAborted;
 		
 		$ids = explode(",",$_POST["id"]);
 		$dir = TEMP_DIR;	
@@ -106,7 +105,7 @@
 	
 
 	function startDownload($link){ 
-		global $dlLink,$dlFile;
+		global $userLink,$dlFile;
 		
 		$dir = DOWNLOAD_DIR; 	
 		
@@ -116,9 +115,21 @@
 			$cookiefile = ul_fetchCookieFile();
 		
 			$dlFile = fopen($dir.$dlFilename, "w");
-			$dlLink = $dir.$dlFilename; 
+			$userLink = $dir.$dlFilename; 
 		
 			ul_load($dlFile,$link,$dlFilename,$cookiefile);
+			fclose($dlFile);
+		}
+		if(strpos($link,"rapidshare.com")){
+			$dlFilename = rs_getFilename($link);
+			$dlLink = rs_getDlLink($link);
+			$userLink = $dir.$dlFilename;
+
+			$dlFile = fopen($userLink,"w");
+
+			debug($dlFilename);
+			rs_load($dlFile, $dlLink, $dlFilename);
+
 			fclose($dlFile);
 		}		
 		else{
@@ -128,14 +139,14 @@
 			$dir = DOWNLOAD_DIR; 	
 		
 			$curlHandle = curl_init();
-			$dlFile = fopen($dir.$filename, "w+");
-			$dlLink = $dir.$filename; 
+			$userLink = $dir.$filename; 
+			$dlFile = fopen($userLink, "w+");
 			
 			curl_setopt ($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
 			curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
 			curl_setopt($curlHandle,CURLOPT_NOPROGRESS,false);
 			curl_setopt($curlHandle,CURLOPT_PROGRESSFUNCTION,'curlCallback');
-			curl_setopt($curlHandle, CURLOPT_BUFFERSIZE, 262144);
+			curl_setopt($curlHandle, CURLOPT_BUFFERSIZE, 524288);
 			curl_setopt($curlHandle, CURLOPT_FILE,$dlFile);
 			curl_setopt ($curlHandle, CURLOPT_URL,$link);
 		
@@ -146,11 +157,12 @@
 		}
 	}
 	
-	$callcount;
-	
+
 	function curlCallback($downloadSize, $downloaded, $uploadSize, $uploaded){
-		global $globalID,$dlLink,$dlFile,$test;
+		global $globalID,$userLink,$dlFile,$test;
 		set_time_limit(60);
+		
+		// debug("dlsize:".$downloadSize."  downloaded:".$downloaded);
 		
 		$dir = TEMP_DIR;
 		$filename = $dir.$globalID.".dld";
@@ -163,7 +175,7 @@
 				
 		if($args[0] == "abort"){			
 			fclose($dlFile);
-			unlink($dlLink);
+			unlink($userLink);
 			unlink($filename);
 				
 			$downloadAborted = true;
@@ -172,9 +184,16 @@
 	
 		if($downloadSize != 0){
 			$file = fopen($filename, "w");
-			fwrite($file, $downloaded/$downloadSize."\n".$dlLink."\n");			
+			fwrite($file, $downloaded/$downloadSize."\n".$userLink."\n");			
 			fclose($file);
 		}
+	}
+	
+
+	function debug($str){
+		$f = fopen("debug.log","a");
+		fwrite($f, date("d.m.y H:i:s ").$str."\n");
+		fclose($f);
 	}
 	
 
