@@ -87,15 +87,16 @@
 		if($args[0] == "init_req"){	
 			$globalID = $id;
 			startDownload($args[1]);
+			debug($args[1]);
 			//die();
 		}
-		if($args[0] == 1){
-			die("fin"."@".$id."@".$args[1]);
+		if($args[0] == $args[1]){
+			die("fin"."@".$id."@".$args[2]);
 		}
 		if($args[0] == "abort"){
 			die("abort");
 		}
-		else 	die("suc"."@".$id."@".$args[0]);
+		else 	die("suc"."@".$id."@".$args[0]."@".$args[1]."@".$args[2]);
 		
 			
 		if($downloadAborted) die("busy");
@@ -162,7 +163,7 @@
 		global $globalID,$userLink,$dlFile,$test;
 		set_time_limit(60);
 		
-		// debug("dlsize:".$downloadSize."  downloaded:".$downloaded);
+		//debug("dlsize:".$downloadSize."  downloaded:".$downloaded);
 		
 		$dir = TEMP_DIR;
 		$filename = $dir.$globalID.".dld";
@@ -181,10 +182,14 @@
 			$downloadAborted = true;
 			return;
 		}
+		
 	
 		if($downloadSize != 0){
+			//workaround sloopy progress bar
+			if($downloaded < $args[0]) return;
+
 			$file = fopen($filename, "w");
-			fwrite($file, $downloaded/$downloadSize."\n".$userLink."\n");			
+			fwrite($file, $downloaded."\n".$downloadSize."\n".$userLink."\n");			
 			fclose($file);
 		}
 	}

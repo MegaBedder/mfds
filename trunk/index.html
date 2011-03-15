@@ -155,8 +155,25 @@
 			// if(debug) document.getElementById('debugText').innerHTML = response;	
 			//document.write(msgs[i]);
 			
+			if(args[0] == "suc" && !activeDownload.valuesSet){
+				var tmp = args[4].split("/");
+				activeDownload.valuesSet = true;
+				activeDownload.link = tmp[tmp.length-1]; 
+
+				if(args[3] > 1024) activeDownload.unit = "KB";
+				if(args[3] > 1024000) activeDownload.unit = "MB";
+				if(args[3] > 1024000000) activeDownload.unit = "GB";
+				activeDownload.downloadSize = args[3];
+				
+				if(activeDownload.link.length <= 40)
+					activeDownload.displayLink = activeDownload.link;
+				else
+					activeDownload.displayLink = "..."+activeDownload.link.substring(link.length-37,link.length-1);
+			}
+			
 			if(args[0] == "suc"){
-				activeDownload.progress =  Math.round(args[2]*10000) / 100; 
+				activeDownload.progress =  Math.round((args[2]/args[3])*10000) / 100;
+				activeDownload.downloaded = args[2];				 
 			}			
 			
 			if(args[0] == "fin"){
@@ -204,16 +221,37 @@
 			return;
 		}
 		var table = "<form name='statusForm'><table style='color:#FFFFFF'><tr style='color:#FFFFFF;'><td width=70>";
-		table += "<center><button type='button' onmousedown='selectAll();'> All</button></center></td><td width=608>File:</td><td>Progress:</td>";
+		table += "<center><button type='button' onmousedown='selectAll();'> All</button></center></td><td width=350>File</td><td width=200>Progress<td width=122>Status</td>";
 		var selected = "" ;
 		
 		if(activeDownload != null){
 			if(activeDownload.selected) selected="checked";
 			else selected="";
+			var downloaded,downloadSize,progStr;
+			
+			if(activeDownload.unit == "Byte"){
+				downloaded  = activeDownload.downloaded;
+				downloaded  = activeDownload.downloaded;
+			}
+			if(activeDownload.unit == "KB"){
+				downloaded  = (Math.round( (activeDownload.downloaded/1024) * 10 )) / 10;
+				downloadSize  = (Math.round( (activeDownload.downloadSize/1024) * 10 )) / 10;
+			}
+			if(activeDownload.unit == "MB"){
+				downloaded  = (Math.round( (activeDownload.downloaded/1024000) * 10 )) / 10;
+				downloadSize  = (Math.round( (activeDownload.downloadSize/1024000) * 10 )) / 10;
+			}
+			if(activeDownload.unit == "GB"){
+				downloaded  = (Math.round( (activeDownload.downloaded/1024000000) * 10 )) / 10;
+				downloadSize  = (Math.round( (activeDownload.downloadSize/1024000000) * 10 )) / 10;
+			}
+
+			downloadSize != undefined ? progStr = downloaded + " / " + downloadSize + " " + activeDownload.unit : progStr = "";
 			
 			table += "<tr style='background-color:#4c4f4a'><td><div onmousedown='activeDownload.selected = !activeDownload.selected;'>";
 			table += "<center><input type='checkbox'"+selected+"></center>"
-			table += "<td>"+activeDownload.link+"</td><td>"+activeDownload.progress+" %</td></tr>";
+			table += "<td>"+activeDownload.displayLink+"</td><td>"+progStr+"</td>";
+			table += "<td>"+activeDownload.progress+" %</td></tr>";
 		}
 		for(var i=0; i<queue.length; i++){
 			if(queue[i].selected) selected="checked";
@@ -224,7 +262,7 @@
 			else trstyle = "";
 			
 			table += "<tr "+trstyle+"<td><div onmousedown='queue["+i+"].selected = !queue["+i+"].selected;'>";
-			table += "<center><input type='checkbox'"+selected+"></center></div><td>"+queue[i].link+"</td><td style='color:#cdb21d;'>pending...</td></tr>";
+			table += "<center><input type='checkbox'"+selected+"></center></div><td>"+queue[i].displayLink+"</td><td></td><td style='color:#cdb21d;'>pending...</td></tr>";
 		}
 
 		for(var i=0; i<finishedDownloads.length; i++){
@@ -235,7 +273,8 @@
 			if((i+queue.length+offset-1) % 2 != 0) trstyle = "style='background-color:#4c4f4a;'";
 			else trstyle = "";
 
-			table += "<tr "+trstyle+"><td></td><td><a href='"+finishedDownloads[i].link+"'>"+finishedDownloads[i].link+"</a></td><td style='color:#66bd10;'>finished</td></tr>";
+			table += "<tr "+trstyle+"><td></td><td><a href='"+finishedDownloads[i].link+"'>"+finishedDownloads[i].displayLink;
+			table += "</a></td><td></td><td style='color:#66bd10;'>finished</td></tr>";
 		}
 		
 		table += "</table></form>";
@@ -287,7 +326,7 @@ No downloads added yet...
 </div>
 <br>
 
-<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="http://ul.to/7gz616" size="40">
+<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="http://rapidshare.com/files/452549785/0277.JPG" size="40">
 <table border="0">
 <tr>
 <td> <button id="submitButton" onClick="addDownload();">Send request</button> </td>

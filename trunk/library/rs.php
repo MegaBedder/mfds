@@ -1,6 +1,7 @@
 <?php
-	// test-link "http://rapidshare.com/files/452549785/0277.JPG";
-
+	// test-links http://rapidshare.com/files/452549785/0277.JPG
+	// 		  http://rapidshare.com/files/452716674/carsten
+	
 	function rs_getDlLink($link){
 		$user = ("rippedoff01");
 		$pass = ("rippedoff");

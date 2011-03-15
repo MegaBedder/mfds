@@ -4,8 +4,8 @@
 	function ul_fetchCookieFile(){
 		global $cookieFolder;
 		
-		$args = "email=908465&password=rippedoff&submit=Login";
-		$url = "http://uploaded.to/login";
+		$args = "id=908465&pw=rippedoff";
+		$url = "http://uploaded.to/io/login";
 		
 		$cookiefile = "ul_cookie.txt";
 		$curl = curl_init();
@@ -16,7 +16,9 @@
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		$msg = curl_exec($curl);
-		curl_close ($curl);	
+		curl_close ($curl);
+		
+		debug($msg);	
 
 		return $cookiefile;
 	}
