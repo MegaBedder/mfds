@@ -10,12 +10,14 @@ function DownloadModel(link){
 	this.downloadSize = 0;
 	this.valuesSet = false;
 	this.unit = "Byte"
-	
-	if(link.length <= 40)
+	/*
+	// shorten link, a matter of taste	
+	if(link.length <= 25)
 		this.displayLink = link;
-	else
-		this.displayLink = "..."+link.substring(link.length-37,link.length);
+	else{
+		this.displayLink = "..."+link.substring(link.length-22,link.length);
+	}
+	*/
 	
+	this.displayLink = "retrieving information...";
 }
-
-

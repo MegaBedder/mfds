@@ -1,6 +1,7 @@
 <?php
 	// test-links http://rapidshare.com/files/452549785/0277.JPG
-	// 		  http://rapidshare.com/files/452716674/carsten
+	// http://rapidshare.com/files/452870539/ulli
+	// http://rapidshare.com/files/452871539/tony
 	
 	function rs_getDlLink($link){
 		$user = ("rippedoff01");
