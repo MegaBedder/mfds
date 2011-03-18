@@ -1,6 +1,5 @@
 <?php
-	// testLink "http://uploaded.to/file/km5mr0";
-
+	// testLink "http://uploaded.to/file/z61m0yyt";
 	function ul_fetchCookieFile(){
 		global $cookieFolder;
 		
@@ -25,7 +24,7 @@
 	
 	function ul_getDlFilename($link){
 		$tmp = explode("/",$link);
-		$apiLink = "http://uploaded.to/api/file?id=".$tmp[count($tmp)-1];		
+		$apiLink = "http://uploaded.to/api/filemultiple?apikey=hP5Y37ulYfr8gSsS97LCT7kG5Gqp8Uug&id_0=".$tmp[count($tmp)-1];		
 	
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL,$apiLink);
@@ -34,11 +33,10 @@
 		$msg = curl_exec($curl);
 		curl_close ($curl);
 		
-		$tmp = explode("\n",$msg);
-		
-	
-		return substr($tmp[0],0,strlen($tmp[0])-1);;
+		$tmp = explode(",",$msg);
+		return substr($tmp[4],0,strlen($tmp[4])-1);
 	}
+	
 	
 	
 	function ul_load($dlFile,$dlLink,$dlFilename,$cookiefile)
