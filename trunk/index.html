@@ -282,8 +282,8 @@
 			if((i+queue.length+offset-1) % 2 != 0) trstyle = "style='background-color:#4c4f4a;'";
 			else trstyle = "";
 
-			table += "<tr "+trstyle+"><td></td><td>&nbsp;<a href='"+finishedDownloads[i].link+"'>"+finishedDownloads[i].displayLink;
-			table += "</a></td><td></td><td></td><td style='color:#66bd10;'>&nbsp;finished</td></tr>";
+			table += "<tr "+trstyle+"><td><center><input type='checkbox' disabled='true'></td><td>&nbsp;<a href='"+finishedDownloads[i].link+"'>";
+			table += finishedDownloads[i].displayLink+"</a></td><td></td><td></td><td style='color:#66bd10;'>&nbsp;finished</td></tr>";
 		}
 		
 		table += "</table></form>";

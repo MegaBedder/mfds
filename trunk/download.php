@@ -9,7 +9,6 @@
 	$globalID;
 	$userLink;
 	$dlFile;
-	$downloadAborted = false;
 	
 	function createRandomFilename(){
 		$cs = CHAR_SPACE;
@@ -66,7 +65,7 @@
 
 
 	if(isset($_POST["id"]) && isset($_POST["status"])){
-		global $globalID,$userLink,$downloadAborted;
+		global $globalID,$userLink;
 		
 		$ids = explode(",",$_POST["id"]);
 		$dir = TEMP_DIR;	
@@ -80,15 +79,20 @@
 		$fsize = filesize($filename);
 
 		if(!$fsize) die("busy");
-
-		$args = split("\n", fread($file,filesize($filename)));
+		
+		$input = fread($file,filesize($filename));
+		if($input = "") die("busy");
+		
+		debug($input);
+		$args = split("\n", $input);
+		
 		fclose($file);
-	
+		
+			
 		if($args[0] == "init_req"){	
 			$globalID = $id;
 			startDownload($args[1]);
-			debug($args[1]);
-			//die();
+			die();
 		}
 		if($args[0] == $args[1]){
 			die("fin"."@".$id."@".$args[2]);
@@ -97,10 +101,7 @@
 			die("abort");
 		}
 		else 	die("suc"."@".$id."@".$args[0]."@".$args[1]."@".$args[2]);
-		
-			
-		if($downloadAborted) die("busy");
-		
+
 		die();	
 	}
 	
@@ -178,9 +179,7 @@
 			fclose($dlFile);
 			unlink($userLink);
 			unlink($filename);
-				
-			$downloadAborted = true;
-			return;
+			die();
 		}
 		
 	
