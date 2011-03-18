@@ -29,7 +29,7 @@
 		var link = document.getElementById("linkinput").value;
 		var dl = new DownloadModel(link);
 		dl.progress = 0;
-		
+
 		if(activeDownload == null) {
 			activeDownload = dl;
 			sendDownloadRequest(link);
@@ -86,7 +86,6 @@
 		}
 	
 		
-				
 		setTimeout('statusRequestLoop()',500);
 		var params = "status=1&id="+activeDownload.id;
 		
@@ -161,11 +160,13 @@
 			// if(debug) document.getElementById('debugText').innerHTML = response;	
 			//document.write(msgs[i]);
 			
+	
+	//		alert(args[0]);
 			if(args[0] == "suc" && !activeDownload.valuesSet){
 				var tmp = args[4].split("/");
 				activeDownload.valuesSet = true;
 				activeDownload.link = tmp[tmp.length-1]; 
-
+				
 				if(args[3] > 1024) activeDownload.unit = "KB";
 				if(args[3] > 1024000) activeDownload.unit = "MB";
 				if(args[3] > 1024000000) activeDownload.unit = "GB";
@@ -335,7 +336,7 @@ Nothing to do...
 </div>
 <br>
 
-<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="http://rapidshare.com/files/452871539/tony" size="40">
+<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="http://uploaded.to/file/z61m0yyt" size="40">
 <table border="0">
 <tr>
 <td> <button id="submitButton" onClick="addDownload();">Send request</button> </td>

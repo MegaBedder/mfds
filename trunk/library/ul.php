@@ -1,5 +1,7 @@
 <?php
 	// testLink "http://uploaded.to/file/z61m0yyt";
+	// 		http://ul.to/imll131t
+	
 	function ul_fetchCookieFile(){
 		global $cookieFolder;
 		
@@ -17,7 +19,7 @@
 		$msg = curl_exec($curl);
 		curl_close ($curl);
 		
-		debug($msg);	
+//		debug($msg);	
 
 		return $cookiefile;
 	}
@@ -54,4 +56,5 @@
 		curl_close($curl);
 		die();
 	}
+	
 ?>

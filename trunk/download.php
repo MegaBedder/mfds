@@ -81,18 +81,19 @@
 		if(!$fsize) die("busy");
 		
 		$input = fread($file,filesize($filename));
-		if($input = "") die("busy");
+		if($input == "") die("busy");
 		
-		debug($input);
 		$args = split("\n", $input);
 		
 		fclose($file);
+		
+//		debug($input);
 		
 			
 		if($args[0] == "init_req"){	
 			$globalID = $id;
 			startDownload($args[1]);
-			die();
+			//die();
 		}
 		if($args[0] == $args[1]){
 			die("fin"."@".$id."@".$args[2]);
@@ -101,8 +102,9 @@
 			die("abort");
 		}
 		else 	die("suc"."@".$id."@".$args[0]."@".$args[1]."@".$args[2]);
-
-		die();	
+		
+		debug("wtf");
+//		die();	
 	}
 	
 
@@ -111,14 +113,13 @@
 		
 		$dir = DOWNLOAD_DIR; 	
 		
-		
 		if(strpos($link,"uploaded.to") || strpos($link,"ul.to")){
 			$dlFilename = ul_getDlFilename($link);
 			$cookiefile = ul_fetchCookieFile();
-		
 			$dlFile = fopen($dir.$dlFilename, "w");
 			$userLink = $dir.$dlFilename; 
-		
+			
+			debug($userLink);
 			ul_load($dlFile,$link,$dlFilename,$cookiefile);
 			fclose($dlFile);
 		}
@@ -129,7 +130,6 @@
 
 			$dlFile = fopen($userLink,"w");
 
-			debug($dlFilename);
 			rs_load($dlFile, $dlLink, $dlFilename);
 
 			fclose($dlFile);
@@ -164,6 +164,7 @@
 		global $globalID,$userLink,$dlFile,$test;
 		set_time_limit(60);
 		
+
 		//debug("dlsize:".$downloadSize."  downloaded:".$downloaded);
 		
 		$dir = TEMP_DIR;
