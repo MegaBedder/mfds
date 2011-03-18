@@ -1,6 +1,7 @@
 <?php 
 	include("library/ul.php");
 	include("library/rs.php");
+	include("library/mu.php");
 
 	define("ID_LENGTH",20);
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
@@ -132,6 +133,17 @@
 
 			rs_load($dlFile, $dlLink, $dlFilename);
 
+			fclose($dlFile);
+		}	
+		if(strpos($link,"megaupload.com")){
+			$dlFilename = mu_getDlFilename($link);
+			$dlFile = fopen($dlFilename,"w");
+			$cookiefile = mu_fetchCookieFile();
+			$userLink = $dir.$dlFilename; 
+			
+			debug($userLink);
+			
+			mu_load($dlFile,$link,$dlFilename,$cookiefile);
 			fclose($dlFile);
 		}		
 		else{
