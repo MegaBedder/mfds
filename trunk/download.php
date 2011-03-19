@@ -2,7 +2,8 @@
 	include("library/ul.php");
 	include("library/rs.php");
 	include("library/mu.php");
-
+	include("library/hf.php");
+	
 	define("ID_LENGTH",20);
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 	define("TEMP_DIR", "temp/");
@@ -144,6 +145,17 @@
 			debug($userLink);
 			
 			mu_load($dlFile,$link,$dlFilename,$cookiefile);
+			fclose($dlFile);
+		}
+		if(strpos($link,"hotfile.com")){
+			$dlFilename = hf_getDlFilename($link);
+			$dlFile = fopen($dlFilename,"w");
+			$cookiefile = hf_fetchCookieFile();
+			$userLink = $dir.$dlFilename; 
+			
+			debug($userLink);
+			
+			hf_load($dlFile,$link,$dlFilename,$cookiefile);
 			fclose($dlFile);
 		}		
 		else{
