@@ -23,7 +23,7 @@
 		return $string;
 	}
 
-	function createDwonloadId($link){
+	function createDownloadId($link){
 		$dir = TEMP_DIR;
 		
 		$id = createRandomFilename();
@@ -36,7 +36,7 @@
 	}
 
 	if(isset($_POST["link"]) && isset($_POST["init"])){
-		$id = createDwonloadId($_POST["link"]);
+		$id = createDownloadId($_POST["link"]);
 
 		if(!$id) 
 			die("error");
