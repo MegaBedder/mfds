@@ -1,0 +1,30 @@
+body{
+	background-color:#383a36;
+	color: #FFFFFF;
+}
+
+a{
+	color:#FFFFFF;
+}
+
+
+#activeDownloadsTableHead{
+	width:800px; 
+	height:40px; 
+	background-color:#383a36;
+	border-style:solid; 
+	border-bottom-style:none; 
+	border-width:1px;
+	font-size:30px;
+}
+
+#activeDownloadsTable{
+	width:800px; 
+	height:600px; 
+	background-color:#383a36;
+	overflow:auto; 
+	border-style:solid; 
+	border-width:1px;
+}
+
+
