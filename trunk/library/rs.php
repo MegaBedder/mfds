@@ -26,7 +26,7 @@
 		return "http://$server/cgi-bin/rsapi.cgi?sub=download&fileid=$fileid&filename=$filename&login=$user&password=$pass";
 	}
 
-	function rs_getFilename($link){
+	function rs_getDlFilename($link){
 		$cache = explode("/",$link);
 		return $cache[count($cache)-1];
 	}

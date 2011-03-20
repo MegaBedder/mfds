@@ -2,12 +2,12 @@
 	//$dlLink ="http://hotfile.com/dl/110921239/506ac05/Thumbs.db.html";
 	
 	function hf_fetchCookieFile(){
-		global $cookieFolder;
+		$dir = COOKIE_DIR;
 		
 		$args = "user=758948&pass=0nly4me";
 		$url = "http://hotfile.com/login.php";
 		
-		$cookiefile = "hf_cookie.txt";
+		$cookiefile = $dir."hf_cookie.txt";
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL,$url);
 		curl_setopt ($curl, CURLOPT_POST, 1);
@@ -18,20 +18,18 @@
 		$msg = curl_exec($curl);
 		curl_close ($curl);
 		
-//		debug($msg);	
 
 		return $cookiefile;
 	}
 	
 	function hf_getDlFilename($link){
-	$tmp = explode("/",$link);
-	return substr($tmp[6],0,strlen($tmp[6])-5);
+		$tmp = explode("/",$link);
+		return substr($tmp[6],0,strlen($tmp[6])-5);
 	}
 	
 	
-	function hf_load($dlFile,$dlLink,$dlFilename,$cookiefile
-	{
-			
+	function hf_load($dlFile,$dlLink,$dlFilename,$cookiefile)
+	{	
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);

@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>Multi-Filehoster-Leech</title>
-<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" type="text/css" href="style/style.css">
 </head>
 
 <body>
@@ -9,7 +9,7 @@
 <script type="text/javascript" src="library/SpeedMeter.js"></script>
 <script type="text/javascript">
 
-	var smeter;
+	var smeter = new SpeedMeter();
 
 	var http = createRequestObject();
 	var dlStarted = false;
@@ -19,10 +19,11 @@
 	//var downloads[0].id;
 	var debug = true;
 	
-	var downloading = false;
+
 	var activeDownload = null;
 	var queue = new Array();
 	var finishedDownloads = new Array();
+	var failedDownloads = new Array();
 	
 	
 	function addDownload(){
@@ -32,11 +33,13 @@
 
 		if(activeDownload == null) {
 			activeDownload = dl;
-			sendDownloadRequest(link);
 		}
 		else{
 			queue.push(dl);
 		}
+
+		displayTable();
+		sendDownloadInfoRequest(link);
 	}
 
 	
@@ -54,9 +57,12 @@
 	
 
 	function statusRequestLoop() {
-		if(activeDownload.complete) {
-			sendFinishRequest();
-			finishedDownloads.push(activeDownload);
+		if(activeDownload.complete || activeDownload.aborted) {
+			
+			if(activeDownload.complete){
+				finishedDownloads.push(activeDownload);
+				sendFinishRequest();
+			}
 
 			if(queue.length != 0){
 				activeDownload = queue.shift();
@@ -70,22 +76,7 @@
 				return;
 			}
 		}
-	
-		if(activeDownload.aborted) {
-			if(queue.length != 0){
-				activeDownload = queue.shift();
-				sendDownloadRequest(activeDownload.link);
-				displayTable();
-				return;
-			}
-			else{
-				activeDownload = null;
-				displayTable();
-				return;
-			}
-		}
-	
-		
+
 		setTimeout('statusRequestLoop()',500);
 		var params = "status=1&id="+activeDownload.id;
 		
@@ -100,10 +91,23 @@
 		http.send(params);
 	}
 
+	function sendDownloadInfoRequest(link){		
+		var params = "info=1&link="+link;
+		
+		http.open('POST','download.php');
+		http.onreadystatechange = refreshView;
+
+		//Send the proper header information along with the request
+		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		http.setRequestHeader("Content-length", params.length);
+		http.setRequestHeader("Connection", "close");
+
+		http.send(params);
+	}
 
 	function sendDownloadRequest(link){
 		//document.downloadForm.submitButton.disabled = true;
-		smeter = new SpeedMeter(5);
+		smeter = new SpeedMeter(2);
 	
 		var params = "init=1&link="+link;
 		
@@ -116,7 +120,6 @@
 		http.setRequestHeader("Connection", "close");
 
 		http.send(params);
-
 	//	return false;
 	}
 	
@@ -160,8 +163,27 @@
 			// if(debug) document.getElementById('debugText').innerHTML = response;	
 			//document.write(msgs[i]);
 			
-	
-	//		alert(args[0]);
+			
+			if(args[0] == "info"){
+				if(!queue.length){
+					if(args[1] == "<404>"){
+						failedDownloads.push(activeDownload);
+						activeDownload = null;
+						displayTable();
+						return;
+					}
+					activeDownload.displayLink = args[1];
+					sendDownloadRequest(args[2]);
+				}
+				else{
+					for(var i=0; i<queue.length; i++){
+						if(args[2] == queue[i].link)
+							queue[i].displayLink = args[1];
+					}
+				}
+			}
+			
+
 			if(args[0] == "suc" && !activeDownload.valuesSet){
 				var tmp = args[4].split("/");
 				activeDownload.valuesSet = true;
@@ -191,7 +213,6 @@
 			}
 			if(args[0] == "abort"){
 				activeDownload.aborted = true;
-				return;
 			}
 			if(args[0] == "id"){
 				activeDownload.id = args[1];
@@ -224,10 +245,11 @@
 	}
 	
 	function displayTable(){
-		if(activeDownload == null && queue.length == 0 && finishedDownloads.length == 0){
+		if(activeDownload == null && queue.length == 0 && finishedDownloads.length == 0 && failedDownloads.length == 0){
 			document.getElementById('activeDownloadsTableContent').innerHTML = "Nothing to do...";
 			return;
 		}
+		
 		var table = "<form name='statusForm'><table style='color:#FFFFFF'><tr style='color:#FFFFFF;'><td width=70>";
 		table += "<center><button type='button' onmousedown='selectAll();'> All</button></center></td><td width=270>&nbsp;File";
 		table += "</td><td width=165>&nbsp;Progress<td width=120>&nbsp;Speed</td><td width=122>Status</td>";
@@ -256,7 +278,7 @@
 			}
 
 			downloadSize != undefined ? progStr = downloaded + " / " + downloadSize + " " + activeDownload.unit : progStr = "";
-			
+
 			table += "<tr style='background-color:#4c4f4a'><td><div onmousedown='activeDownload.selected = !activeDownload.selected;'>";
 			table += "<center><input type='checkbox'"+selected+"></center>"
 			table += "<td>&nbsp;"+activeDownload.displayLink+"</td><td>&nbsp;"+progStr+"</td>";
@@ -285,6 +307,18 @@
 
 			table += "<tr "+trstyle+"><td><center><input type='checkbox' disabled='true'></td><td>&nbsp;<a href='"+finishedDownloads[i].link+"'>";
 			table += finishedDownloads[i].displayLink+"</a></td><td></td><td></td><td style='color:#66bd10;'>&nbsp;finished</td></tr>";
+		}
+
+		for(var i=0; i<failedDownloads.length; i++){
+			var trstyle;
+			var offset = 0;
+			if(activeDownload != null) offset = 1;
+			
+			if((i+queue.length+offset-1) % 2 != 0) trstyle = "style='background-color:#4c4f4a;'";
+			else trstyle = "";
+
+			table += "<tr "+trstyle+"><td><center><input type='checkbox' disabled='true'></td><td>&nbsp;"+failedDownloads[i].link;
+			table += "</td><td></td><td></td><td style='color:#ae2424;'>&nbsp;failed(404)</td></tr>";
 		}
 		
 		table += "</table></form>";
@@ -336,7 +370,7 @@ Nothing to do...
 </div>
 <br>
 
-<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="http://uploaded.to/file/z61m0yyt" size="40">
+<input type="text" id="linkinput" onkeydown="if (event.keyCode == 13) document.getElementById('submitButton').click();" value="rotnes.dk/carsten" size="40">
 <table border="0">
 <tr>
 <td> <button id="submitButton" onClick="addDownload();">Send request</button> </td>

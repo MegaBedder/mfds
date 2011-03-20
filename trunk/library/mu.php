@@ -15,23 +15,24 @@
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		$msg = curl_exec($curl);
+		
 		curl_close ($curl);
 		
-		debug($msg);
 		$tmp = explode("&",$msg);
-	
+		if(count($tmp) < 5) return "<404>";		
+			
 		$tmp = explode("=",$tmp[count($tmp)-1]);
 		
 		return $tmp[count($tmp)-1];
 	}
 	
 	function mu_fetchCookieFile(){
-		global $cookieFolder;
+		$dir = COOKIE_DIR;
 		
 		$url = "http://www.megaupload.com/";
 		$args = "login=1&username=ecocharli&password=eco111ilr";
 		
-		$cookiefile = "mu_cookie.txt";
+		$cookiefile = $dir."mu_cookie.txt";
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL,$url);
 		curl_setopt ($curl, CURLOPT_POST, 1);
@@ -39,6 +40,7 @@
 		curl_setopt($curl, CURLOPT_COOKIEJAR, $cookiefile);
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
 		$msg = curl_exec($curl);
 		curl_close ($curl);
 		

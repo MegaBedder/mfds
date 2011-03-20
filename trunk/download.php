@@ -8,6 +8,7 @@
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 	define("TEMP_DIR", "temp/");
 	define("DOWNLOAD_DIR", "downloads/");
+	define("COOKIE_DIR", "cookies/");
 	$globalID;
 	$userLink;
 	$dlFile;
@@ -35,6 +36,28 @@
 		return $id;
 	}
 
+	if(isset($_POST["link"]) && isset($_POST["info"])){
+		if(strpos($_POST["link"],"uploaded.to") || strpos($_POST["link"],"ul.to")){
+			$filename = ul_getDlFilename($_POST["link"]);
+			debug($filename);
+		}
+		else if(strpos($_POST["link"],"rapidshare.com")){
+			$filename = rs_getDlFilename($_POST["link"]);
+		}
+		else if(strpos($_POST["link"],"megaupload.com")){
+			$filename = mu_getDlFilename($_POST["link"]);
+		}
+		else if(strpos($_POST["link"],"hotfile.com")){
+			$filename = hf_getDlFilename($_POST["link"]);
+		}
+		else{
+			$tmp = explode("/",$_POST["link"]);
+			$filename = $tmp[count($tmp)-1];
+		}
+		
+		die("info@".$filename."@".$_POST["link"]);
+
+	}
 	if(isset($_POST["link"]) && isset($_POST["init"])){
 		$id = createDownloadId($_POST["link"]);
 
@@ -89,23 +112,22 @@
 		
 		fclose($file);
 		
-//		debug($input);
 		
-			
 		if($args[0] == "init_req"){	
 			$globalID = $id;
+			$file = fopen($filename, "w");
+			fclose($file);
+
 			startDownload($args[1]);
-			//die();
 		}
-		if($args[0] == $args[1]){
+		else if($args[0] == $args[1]){
 			die("fin"."@".$id."@".$args[2]);
 		}
-		if($args[0] == "abort"){
+		else if($args[0] == "abort"){
 			die("abort");
 		}
 		else 	die("suc"."@".$id."@".$args[0]."@".$args[1]."@".$args[2]);
 		
-		debug("wtf");
 //		die();	
 	}
 	
@@ -120,13 +142,12 @@
 			$cookiefile = ul_fetchCookieFile();
 			$dlFile = fopen($dir.$dlFilename, "w");
 			$userLink = $dir.$dlFilename; 
-			
-			debug($userLink);
+
 			ul_load($dlFile,$link,$dlFilename,$cookiefile);
 			fclose($dlFile);
 		}
 		if(strpos($link,"rapidshare.com")){
-			$dlFilename = rs_getFilename($link);
+			$dlFilename = rs_getDlFilename($link);
 			$dlLink = rs_getDlLink($link);
 			$userLink = $dir.$dlFilename;
 
@@ -142,42 +163,43 @@
 			$cookiefile = mu_fetchCookieFile();
 			$userLink = $dir.$dlFilename; 
 			
-			debug($userLink);
-			
 			mu_load($dlFile,$link,$dlFilename,$cookiefile);
 			fclose($dlFile);
 		}
 		if(strpos($link,"hotfile.com")){
 			$dlFilename = hf_getDlFilename($link);
-			$dlFile = fopen($dlFilename,"w");
 			$cookiefile = hf_fetchCookieFile();
 			$userLink = $dir.$dlFilename; 
+			$dlFile = fopen($userLink,"w");
 			
-			debug($userLink);
 			
 			hf_load($dlFile,$link,$dlFilename,$cookiefile);
 			fclose($dlFile);
 		}		
 		else{
+
 			
 			$cache = preg_split("%/%",$link); //split url to get filename
 			$filename = $cache[count($cache)-1]; 
 			$dir = DOWNLOAD_DIR; 	
+
 		
 			$curlHandle = curl_init();
 			$userLink = $dir.$filename; 
-			$dlFile = fopen($userLink, "w+");
-			
+			$dlFile = fopen($userLink, "w");
+
 			curl_setopt ($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
 			curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($curlHandle,CURLOPT_NOPROGRESS,false);
+			curl_setopt($curlHandle, CURLOPT_NOPROGRESS,false);
 			curl_setopt($curlHandle,CURLOPT_PROGRESSFUNCTION,'curlCallback');
 			curl_setopt($curlHandle, CURLOPT_BUFFERSIZE, 524288);
 			curl_setopt($curlHandle, CURLOPT_FILE,$dlFile);
 			curl_setopt ($curlHandle, CURLOPT_URL,$link);
-		
+			
 			curl_exec ($curlHandle);
 			curl_close($curlHandle);
+
+
 
 			fclose($dlFile);
 		}
@@ -185,11 +207,10 @@
 	
 
 	function curlCallback($downloadSize, $downloaded, $uploadSize, $uploaded){
-		global $globalID,$userLink,$dlFile,$test;
+		global $globalID,$userLink,$dlFile;
 		set_time_limit(60);
 		
-
-		//debug("dlsize:".$downloadSize."  downloaded:".$downloaded);
+//		debug("dlsize:".$downloadSize."  downloaded:".$downloaded);
 		
 		$dir = TEMP_DIR;
 		$filename = $dir.$globalID.".dld";

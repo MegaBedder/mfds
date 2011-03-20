@@ -3,12 +3,12 @@
 	// 		http://ul.to/imll131t
 	
 	function ul_fetchCookieFile(){
-		global $cookieFolder;
+		$dir = COOKIE_DIR;
 		
 		$args = "id=908465&pw=rippedoff";
 		$url = "http://uploaded.to/io/login";
 		
-		$cookiefile = "ul_cookie.txt";
+		$cookiefile = $dir."ul_cookie.txt";
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL,$url);
 		curl_setopt ($curl, CURLOPT_POST, 1);
@@ -16,10 +16,10 @@
 		curl_setopt($curl, CURLOPT_COOKIEJAR, $cookiefile);
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
 		$msg = curl_exec($curl);
 		curl_close ($curl);
 		
-//		debug($msg);	
 
 		return $cookiefile;
 	}
@@ -34,9 +34,12 @@
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		$msg = curl_exec($curl);
 		curl_close ($curl);
-		
+
 		$tmp = explode(",",$msg);
-		return substr($tmp[4],0,strlen($tmp[4])-1);
+		if($tmp[0] == "offline") return "<404>";
+		
+
+		return substr($tmp[count($tmp)-1],0,strlen($tmp[count($tmp)-1])-1);
 	}
 	
 	
