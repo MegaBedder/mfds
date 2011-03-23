@@ -3,6 +3,7 @@
 	include("library/rs.php");
 	include("library/mu.php");
 	include("library/hf.php");
+	include("library/x7.php");
 	
 	define("ID_LENGTH",20);
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
@@ -49,6 +50,9 @@
 		}
 		else if(strpos($_POST["link"],"hotfile.com")){
 			$filename = hf_getDlFilename($_POST["link"]);
+		}
+		else if(strpos($_POST["link"],"x7.to")){
+			$filename = x7_getDlFilename($_POST["link"]);
 		}
 		else{
 			$tmp = explode("/",$_POST["link"]);
@@ -175,7 +179,17 @@
 			
 			hf_load($dlFile,$link,$dlFilename,$cookiefile);
 			fclose($dlFile);
-		}		
+		}
+		if(strpos($link,"x7.to")){
+			$dlFilename = x7_getDlFilename($link);
+			$cookiefile = x7_fetchCookieFile();
+			$userLink = $dir.$dlFilename; 
+			$dlFile = fopen($userLink,"w");
+			
+			
+			x7_load($dlFile,$link,$dlFilename,$cookiefile);
+			fclose($dlFile);
+		}			
 		else{
 
 			
