@@ -108,7 +108,7 @@
 		$input = fread($file,filesize($filename));
 		if($input == "") die("busy");
 		
-		$args = split("\n", $input);
+		$args = explode("\n", $input);
 		
 		fclose($file);
 		
@@ -179,7 +179,7 @@
 		else{
 
 			
-			$cache = preg_split("%/%",$link); //split url to get filename
+			$cache = explode("/",$link); //split url to get filename
 			$filename = $cache[count($cache)-1]; 
 			$dir = DOWNLOAD_DIR; 	
 
@@ -218,7 +218,7 @@
 		if(!file_exists($filename)) return;
 		
 		$file = fopen($filename, "r");
-		$args = split("\n", fread($file,filesize($filename)));
+		$args = explode("\n", fread($file,filesize($filename)));
 		fclose($file);
 				
 		if($args[0] == "abort"){			
