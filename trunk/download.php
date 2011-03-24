@@ -1,10 +1,10 @@
 <?php 
-	include("library/def.php");
-	include("library/ul.php");
-	include("library/rs.php");
-	include("library/mu.php");
-	include("library/hf.php");
-	include("library/x7.php");
+	include("library/hoster/def.php");
+	include("library/hoster/ul.php");
+	include("library/hoster/rs.php");
+	include("library/hoster/mu.php");
+	include("library/hoster/hf.php");
+	include("library/hoster/x7.php");
 	
 	define("ID_LENGTH",20);
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
