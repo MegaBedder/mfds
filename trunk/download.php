@@ -5,6 +5,7 @@
 	include("library/hoster/mu.php");
 	include("library/hoster/hf.php");
 	include("library/hoster/x7.php");
+	include("library/hoster/nl.php");	
 	
 	define("ID_LENGTH",20);
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
@@ -53,6 +54,9 @@
 		}
 		else if(strpos($_POST["link"],"x7.to")){
 			$filename = x7_getDlFilename($_POST["link"]);
+		}
+		else if(strpos($_POST["link"],"netload.in")){
+			$filename = nl_getDlFilename($_POST["link"]);
 		}
 		else{
 			$tmp = explode("/",$_POST["link"]);
@@ -153,6 +157,9 @@
 		}
 		else if(strpos($link,"x7.to")){
 			$prefix = "x7";
+		}			
+		else if(strpos($link,"netload.in")){
+			$prefix = "nl";
 		}			
 		else{
 			$prefix = "def";
