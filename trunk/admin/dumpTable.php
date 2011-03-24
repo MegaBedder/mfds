@@ -8,7 +8,12 @@
 
 	$query = "SELECT * FROM ".$mytable;
 	$results = $base->arrayQuery($query, SQLITE_ASSOC);
-	var_dump($results);
+	
+	foreach($results as $r){
+		var_dump($r);
+		echo "<br>";	
+	}
+
 /*	$arr = $results[0];
 
 	if($results)

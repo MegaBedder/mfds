@@ -29,6 +29,13 @@
 	function mu_fetchCookieFile(){
 		$dir = COOKIE_DIR;
 		
+		$auth = new AuthProvider();
+		$authData = $auth->getAuth("mu");
+		$user = $authData["user"];
+		$pass = $authData["pass"];
+		
+		debug($pass);
+		
 		$url = "http://www.megaupload.com/";
 		$args = "login=1&username=ecocharli&password=eco111ilr";
 		

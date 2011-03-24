@@ -6,6 +6,8 @@
 	include("library/hoster/hf.php");
 	include("library/hoster/x7.php");
 	include("library/hoster/nl.php");	
+
+	include("library/AuthProvider.php");	
 	
 	define("ID_LENGTH",20);
 	define("CHAR_SPACE",'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');

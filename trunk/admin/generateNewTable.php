@@ -10,7 +10,7 @@
 		    ID INTEGER PRIMARY KEY,
 		    hoster text,
 		    user text,
-		    pass text,
+		    pass varbinary(128),
 		    download_amount bigint(32)
 		    )";
             

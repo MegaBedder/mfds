@@ -3,8 +3,8 @@
 	$keyDir = "../safe/";
 	$keyFile = "master.key";
 
-	$pass = 'X';
-	$salt = 'X';
+	$pass = "";
+	$salt = "";
 
 
 
