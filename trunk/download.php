@@ -1,4 +1,5 @@
 <?php 
+	include("library/def.php");
 	include("library/ul.php");
 	include("library/rs.php");
 	include("library/mu.php");
@@ -40,7 +41,6 @@
 	if(isset($_POST["link"]) && isset($_POST["info"])){
 		if(strpos($_POST["link"],"uploaded.to") || strpos($_POST["link"],"ul.to")){
 			$filename = ul_getDlFilename($_POST["link"]);
-			debug($filename);
 		}
 		else if(strpos($_POST["link"],"rapidshare.com")){
 			$filename = rs_getDlFilename($_POST["link"]);
@@ -131,8 +131,6 @@
 			die("abort");
 		}
 		else 	die("suc"."@".$id."@".$args[0]."@".$args[1]."@".$args[2]);
-		
-//		die();	
 	}
 	
 
@@ -142,81 +140,38 @@
 		$dir = DOWNLOAD_DIR; 	
 		
 		if(strpos($link,"uploaded.to") || strpos($link,"ul.to")){
-			$dlFilename = ul_getDlFilename($link);
-			$cookiefile = ul_fetchCookieFile();
-			$dlFile = fopen($dir.$dlFilename, "w");
-			$userLink = $dir.$dlFilename; 
-
-			ul_load($dlFile,$link,$dlFilename,$cookiefile);
-			fclose($dlFile);
+			$prefix = "ul";
 		}
-		if(strpos($link,"rapidshare.com")){
-			$dlFilename = rs_getDlFilename($link);
-			$dlLink = rs_getDlLink($link);
-			$userLink = $dir.$dlFilename;
-
-			$dlFile = fopen($userLink,"w");
-
-			rs_load($dlFile, $dlLink, $dlFilename);
-
-			fclose($dlFile);
+		else if(strpos($link,"rapidshare.com")){
+			$prefix = "rs";
 		}	
-		if(strpos($link,"megaupload.com")){
-			$dlFilename = mu_getDlFilename($link);
-			$dlFile = fopen($dlFilename,"w");
-			$cookiefile = mu_fetchCookieFile();
-			$userLink = $dir.$dlFilename; 
-			
-			mu_load($dlFile,$link,$dlFilename,$cookiefile);
-			fclose($dlFile);
+		else if(strpos($link,"megaupload.com")){
+			$prefix = "mu";
 		}
-		if(strpos($link,"hotfile.com")){
-			$dlFilename = hf_getDlFilename($link);
-			$cookiefile = hf_fetchCookieFile();
-			$userLink = $dir.$dlFilename; 
-			$dlFile = fopen($userLink,"w");
-			
-			
-			hf_load($dlFile,$link,$dlFilename,$cookiefile);
-			fclose($dlFile);
+		else if(strpos($link,"hotfile.com")){
+			$prefix = "hf";
 		}
-		if(strpos($link,"x7.to")){
-			$dlFilename = x7_getDlFilename($link);
-			$cookiefile = x7_fetchCookieFile();
-			$userLink = $dir.$dlFilename; 
-			$dlFile = fopen($userLink,"w");
-			
-			
-			x7_load($dlFile,$link,$dlFilename,$cookiefile);
-			fclose($dlFile);
+		else if(strpos($link,"x7.to")){
+			$prefix = "x7";
 		}			
 		else{
-
-			
-			$cache = explode("/",$link); //split url to get filename
-			$filename = $cache[count($cache)-1]; 
-			$dir = DOWNLOAD_DIR; 	
-
-		
-			$curlHandle = curl_init();
-			$userLink = $dir.$filename; 
-			$dlFile = fopen($userLink, "w");
-
-			curl_setopt ($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
-			curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($curlHandle, CURLOPT_NOPROGRESS,false);
-			curl_setopt($curlHandle,CURLOPT_PROGRESSFUNCTION,'curlCallback');
-			curl_setopt($curlHandle, CURLOPT_BUFFERSIZE, 524288);
-			curl_setopt($curlHandle, CURLOPT_FILE,$dlFile);
-			curl_setopt ($curlHandle, CURLOPT_URL,$link);
-			
-			curl_exec ($curlHandle);
-			curl_close($curlHandle);
-
-
-
-			fclose($dlFile);
+			$prefix = "def";
 		}
+		
+		
+		$filenameFunction = $prefix."_getDlFilename";
+		$cookiFunction = $prefix."_fetchCookieFile";
+		$loadFunction = $prefix."_load";
+
+		$dlFilename = $filenameFunction($link);
+		$userLink = $dir.$dlFilename; 
+		$dlFile = fopen($userLink,"w");
+		$cookiefile = $cookiFunction($link);
+		
+		$loadFunction($dlFile,$link,$cookiefile);
+		fclose($dlFile);
+		
+		
 	}
 	
 
@@ -253,12 +208,9 @@
 		}
 	}
 	
-
 	function debug($str){
 		$f = fopen("debug.log","a");
 		fwrite($f, date("d.m.y H:i:s ").$str."\n");
 		fclose($f);
 	}
-	
-
 ?> 

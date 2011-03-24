@@ -26,12 +26,16 @@
 		return "http://$server/cgi-bin/rsapi.cgi?sub=download&fileid=$fileid&filename=$filename&login=$user&password=$pass";
 	}
 
+	function rs_fetchCookieFile(){
+		return "";
+	}
+
 	function rs_getDlFilename($link){
 		$cache = explode("/",$link);
 		return $cache[count($cache)-1];
 	}
 
-	function rs_load($dlFile,$dlLink,$dlFilename){
+	function rs_load($dlFile,$dlLink,$cookiefile){
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($curl, CURLOPT_FILE,$dlFile);

@@ -28,8 +28,9 @@
 	}
 	
 	
-	function hf_load($dlFile,$dlLink,$dlFilename,$cookiefile)
+	function hf_load($dlFile,$dlLink,$cookiefile)
 	{	
+		debug("blubb");
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);

@@ -35,7 +35,9 @@
 		$msg = curl_exec($curl);
 		curl_close ($curl);
 
+		
 		$tmp = explode(",",$msg);
+		debug($tmp[0] == "offline");
 		if($tmp[0] == "offline") return "<404>";
 		
 
@@ -44,7 +46,7 @@
 	
 	
 	
-	function ul_load($dlFile,$dlLink,$dlFilename,$cookiefile)
+	function ul_load($dlFile,$dlLink,$cookiefile)
 	{
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);

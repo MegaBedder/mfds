@@ -24,7 +24,7 @@
 	
 	function x7_getDlFilename($link){
 		$buffer=(get_meta_tags($link));
-		$buffer=(explode("Download: ",$buffer[description]));
+		$buffer=(explode("Download: ",$buffer["description"]));
 		$buffer=(explode(" (",$buffer[1]));
 		$dlFilename=$buffer[0];
 		
@@ -34,7 +34,7 @@
 	
 	
 	
-	function x7_load($dlFile,$dlLink,$dlFilename,$cookiefile)
+	function x7_load($dlFile,$dlLink,$cookiefile)
 	{
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);

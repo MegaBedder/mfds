@@ -48,7 +48,7 @@
 	}
 	
 
-	function mu_load($dlFile,$dlLink,$dlFilename,$cookiefile)
+	function mu_load($dlFile,$dlLink,$cookiefile)
 	{
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
