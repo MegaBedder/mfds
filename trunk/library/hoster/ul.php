@@ -3,7 +3,7 @@
 	// 		http://ul.to/imll131t
 
 	function ul_fetchCookieFile(){
-		$dir = "";
+		$dir = COOKIE_DIR;
 		
 		$auth = new AuthProvider();
 		$authData = $auth->getAuth("ul");

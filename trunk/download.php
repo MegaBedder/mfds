@@ -65,6 +65,7 @@
 			$filename = $tmp[count($tmp)-1];
 		}
 		
+		debug("info@".$filename."@".$_POST["link"]);
 		die("info@".$filename."@".$_POST["link"]);
 
 	}

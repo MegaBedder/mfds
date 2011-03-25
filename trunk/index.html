@@ -9,7 +9,7 @@
 <script type="text/javascript" src="library/js/SpeedMeter.js"></script>
 <script type="text/javascript">
 
-	var smeter = new SpeedMeter();
+	var smeter;
 
 	var http = createRequestObject();
 	var dlStarted = false;
@@ -81,7 +81,7 @@
 		var params = "status=1&id="+activeDownload.id;
 		
 		http.open('POST','download.php');
-		http.onreadystatechange = refreshView;
+		http.onreadystatechange = acceptAjaxMessage;
 
 		//Send the proper header information along with the request
 		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -95,7 +95,7 @@
 		var params = "info=1&link="+link;
 		
 		http.open('POST','download.php');
-		http.onreadystatechange = refreshView;
+		http.onreadystatechange = acceptAjaxMessage;
 
 		//Send the proper header information along with the request
 		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -107,12 +107,10 @@
 
 	function sendDownloadRequest(link){
 		//document.downloadForm.submitButton.disabled = true;
-		smeter = new SpeedMeter(2);
-	
 		var params = "init=1&link="+link;
 		
 		http.open('POST','download.php');
-		http.onreadystatechange = refreshView;
+		http.onreadystatechange = acceptAjaxMessage;
 
 		//Send the proper header information along with the request
 		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -127,7 +125,7 @@
 		var params = "fin=1&id="+activeDownload.id;
 		
 		http.open('POST','download.php');
-		http.onreadystatechange = refreshView;
+		http.onreadystatechange = acceptAjaxMessage;
 
 		//Send the proper header information along with the request
 		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -143,7 +141,7 @@
 		var params = "abort=1&id="+activeDownload.id;
 		
 		http.open('POST','download.php');
-		http.onreadystatechange = refreshView;
+		http.onreadystatechange = acceptAjaxMessage;
 
 		//Send the proper header information along with the request
 		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -156,7 +154,7 @@
 	
 	}
 
-	function refreshView(){
+	function acceptAjaxMessage(){
 		if(http.readyState == 4){
 			var response = http.responseText;
 			var args = response.split("@");
@@ -177,10 +175,12 @@
 				}
 				else{
 					for(var i=0; i<queue.length; i++){
-						if(args[2] == queue[i].link)
+						if(args[2] == queue[i].link){
 							queue[i].displayLink = args[1];
+						}
 					}
 				}
+				return;
 			}
 			
 
@@ -216,6 +216,7 @@
 			}
 			if(args[0] == "id"){
 				activeDownload.id = args[1];
+				smeter = new SpeedMeter(2);
 				statusRequestLoop();
 			}
 			
@@ -282,7 +283,7 @@
 			table += "<tr style='background-color:#4c4f4a'><td><div onmousedown='activeDownload.selected = !activeDownload.selected;'>";
 			table += "<center><input type='checkbox'"+selected+"></center>"
 			table += "<td>&nbsp;"+activeDownload.displayLink+"</td><td>&nbsp;"+progStr+"</td>";
-			table += "<td>&nbsp;"+smeter.currSpeed+"</td><td>&nbsp;"+activeDownload.progress+" %</td></tr>";
+			table += "<td>&nbsp;"+( smeter ? smeter.currSpeed : "initalizing...")+"</td><td>&nbsp;"+activeDownload.progress+" %</td></tr>";
 		}
 		for(var i=0; i<queue.length; i++){
 			if(queue[i].selected) selected="checked";

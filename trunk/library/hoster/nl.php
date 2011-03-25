@@ -1,18 +1,17 @@
 <?php
 	//$link= 'http://netload.in/datei64ORNkC1iT.htm';
 	function nl_fetchCookieFile(){
-		global $cookieFolder;
-		
+		$dir = COOKIE_DIR;
+	
 		$auth = new AuthProvider();
 		$authData = $auth->getAuth("nl");
 		$user = $authData["user"];
 		$pass = $authData["pass"];
 
-		
-		$args = "txtuser=".$user."&txtpass=".$pass."&txtcheck=login";
+		$args = "txtuser=593068&txtpass=jpqBIL&txtcheck=login&txtlogin=1";
 		$url = "http://netload.in/index.php";
 		
-		$cookiefile = "nl_cookie.txt";
+		$cookiefile = $dir."nl_cookie.txt";
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_URL,$url);
 		curl_setopt ($curl, CURLOPT_POST, 1);
@@ -52,11 +51,13 @@
 	
 	function nl_load($dlFile,$dlLink,$cookiefile)
 	{
+		debug($cookiefile);
+//		debug($dlFile.$dlLink.$cookiefile);
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($curl, CURLOPT_FILE,$dlFile);
-		curl_setopt($curl, CURLOPT_NOPROGRESS,1);
+		curl_setopt($curl, CURLOPT_NOPROGRESS, 0);
 		curl_setopt($curl, CURLOPT_PROGRESSFUNCTION,'curlCallback');
 		curl_setopt($curl, CURLOPT_BUFFERSIZE, 262144);
 		curl_setopt ($curl, CURLOPT_URL,$dlLink);
