@@ -1,11 +1,16 @@
 <?php
 	// testLink "http://uploaded.to/file/z61m0yyt";
 	// 		http://ul.to/imll131t
-	
+
 	function ul_fetchCookieFile(){
-		$dir = COOKIE_DIR;
+		$dir = "";
 		
-		$args = "id=908465&pw=rippedoff";
+		$auth = new AuthProvider();
+		$authData = $auth->getAuth("ul");
+		$user = $authData["user"];
+		$pass = $authData["pass"];
+
+		$args = "id=".$user."&pw=".$pass;
 		$url = "http://uploaded.to/io/login";
 		
 		$cookiefile = $dir."ul_cookie.txt";
@@ -20,7 +25,6 @@
 		$msg = curl_exec($curl);
 		curl_close ($curl);
 		
-
 		return $cookiefile;
 	}
 	
@@ -35,9 +39,7 @@
 		$msg = curl_exec($curl);
 		curl_close ($curl);
 
-		
 		$tmp = explode(",",$msg);
-		debug($tmp[0] == "offline");
 		if($tmp[0] == "offline") return "<404>";
 		
 
@@ -48,6 +50,7 @@
 	
 	function ul_load($dlFile,$dlLink,$cookiefile)
 	{
+		debug($dlFile."  ".$dlLink."  ".$cookiefile);
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -59,7 +62,9 @@
 		curl_setopt($curl, CURLOPT_COOKIEFILE, $cookiefile);
 		curl_exec($curl);
 		curl_close($curl);
-		die();
+		//die();
 	}
+
+
 	
 ?>

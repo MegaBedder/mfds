@@ -4,8 +4,11 @@
 	// http://rapidshare.com/files/452871539/tony
 	
 	function rs_getDlLink($link){
-		$user = ("rippedoff01");
-		$pass = ("rippedoff");
+		$auth = new AuthProvider();
+		$authData = $auth->getAuth("rs");
+		$user = $authData["user"];
+		$pass = $authData["pass"];
+
 
 		// get right server from api
 		$cache = explode("/",$link);
@@ -36,6 +39,8 @@
 	}
 
 	function rs_load($dlFile,$dlLink,$cookiefile){
+		$dlLink = rs_getDlLink($dlLink);  // this is for rs ONLY
+	
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($curl, CURLOPT_FILE,$dlFile);
@@ -46,4 +51,5 @@
 		curl_exec ($curl);
 		curl_close ($curl);
 	}
+	
 ?>

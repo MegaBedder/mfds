@@ -29,7 +29,7 @@
 					$captions .= "'".$caption."',";
 					
 					if(in_array($caption, $encFields))
-						$values   .= "'".$crypter->encrypt($value,$key)."',";
+						$values   .= "'".SQLite3::escapeString($crypter->encrypt($value,$key))."',";
 					else
 						$values   .= "'".SQLite3::escapeString($value)."',";
 				}
@@ -46,6 +46,7 @@
 	}
 	
 	$wrapper = new EncryptedDatabaseWrapper();
+	$wrapper->insert("base","premium", array("hoster" => "rs", "user" => "massiveloader", "pass" => "a9h4i883bd621hs65", "download_amount" => "0"), array("pass"));
 	$wrapper->insert("base","premium", array("hoster" => "hf", "user" => "758948", "pass" => "0nly4me", "download_amount" => "0"), array("pass"));
 	$wrapper->insert("base","premium", array("hoster" => "mu", "user" => "ecocharli", "pass" => "eco111ilr", "download_amount" => "0"), array("pass"));
 	$wrapper->insert("base","premium", array("hoster" => "nl", "user" => "593068", "pass" => "jpqBIL", "download_amount" => "0"), array("pass"));

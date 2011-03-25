@@ -34,10 +34,10 @@
 		$user = $authData["user"];
 		$pass = $authData["pass"];
 		
-		debug($pass);
+		//debug($pass);
 		
 		$url = "http://www.megaupload.com/";
-		$args = "login=1&username=ecocharli&password=eco111ilr";
+		$args = "login=1&username=".$user."&password=".$pass;
 		
 		$cookiefile = $dir."mu_cookie.txt";
 		$curl = curl_init();

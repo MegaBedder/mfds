@@ -25,7 +25,5 @@
 		
 		curl_exec ($curlHandle);
 		curl_close($curlHandle);
-
-		fclose($dlFile);	
 	}
 ?>

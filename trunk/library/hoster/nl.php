@@ -3,7 +3,13 @@
 	function nl_fetchCookieFile(){
 		global $cookieFolder;
 		
-		$args = "txtuser=593068&txtpass=jpqBIL&txtcheck=login";
+		$auth = new AuthProvider();
+		$authData = $auth->getAuth("nl");
+		$user = $authData["user"];
+		$pass = $authData["pass"];
+
+		
+		$args = "txtuser=".$user."&txtpass=".$pass."&txtcheck=login";
 		$url = "http://netload.in/index.php";
 		
 		$cookiefile = "nl_cookie.txt";

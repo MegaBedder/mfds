@@ -177,6 +177,8 @@
 		$dlFile = fopen($userLink,"w");
 		$cookiefile = $cookiFunction($link);
 		
+		
+		
 		$loadFunction($dlFile,$link,$cookiefile);
 		fclose($dlFile);
 		
@@ -188,7 +190,7 @@
 		global $globalID,$userLink,$dlFile;
 		set_time_limit(60);
 		
-//		debug("dlsize:".$downloadSize."  downloaded:".$downloaded);
+		//debug("dlsize:".$downloadSize."  downloaded:".$downloaded);
 		
 		$dir = TEMP_DIR;
 		$filename = $dir.$globalID.".dld";

@@ -1,10 +1,16 @@
 <?php
 	//$dlLink ="http://hotfile.com/dl/110921239/506ac05/Thumbs.db.html";
+	// http://hotfile.com/dl/111764296/5e94e5a/nothing.html
 	
 	function hf_fetchCookieFile(){
 		$dir = COOKIE_DIR;
 		
-		$args = "user=758948&pass=0nly4me";
+		$auth = new AuthProvider();
+		$authData = $auth->getAuth("hf");
+		$user = $authData["user"];
+		$pass = $authData["pass"];
+
+		$args = "user=".$user."&pass=".$pass;
 		$url = "http://hotfile.com/login.php";
 		
 		$cookiefile = $dir."hf_cookie.txt";
@@ -30,7 +36,6 @@
 	
 	function hf_load($dlFile,$dlLink,$cookiefile)
 	{	
-		debug("blubb");
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);

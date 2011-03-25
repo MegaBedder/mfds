@@ -11,10 +11,10 @@
 			$crypter = new Cryptastic();
 
 			$f  = fopen($masterKeyFile,"r");
-			$key = fread($f, filesize($masterKeyFile));
+			// WARNING: 32 is a workaround to fix strange behaviour in download.php when calling filesize()
+			$key = fread($f, 32);
 			fclose($f);
-			
-			
+
 			$dbDir = "safe/";
 			$dbname = 'base';
 
@@ -27,6 +27,7 @@
 	
 			$user = $results[0]["user"];
 			$pass = $crypter->decrypt($results[0]["pass"],$key);
+			
 			
 			return array("user" => $user, "pass" => $pass);
 
