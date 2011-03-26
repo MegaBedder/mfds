@@ -34,8 +34,6 @@
 		$user = $authData["user"];
 		$pass = $authData["pass"];
 		
-		//debug($pass);
-		
 		$url = "http://www.megaupload.com/";
 		$args = "login=1&username=".$user."&password=".$pass;
 		

@@ -10,7 +10,7 @@
 				global $dbDir,$masterKeyFile;
 		
 				$dbasePath = $dbDir.$dbName;
-				var_dump($dbasePath);
+				//var_dump($dbasePath);
 				$dbase = new SQLiteDatabase($dbasePath);
 				
 				
@@ -46,10 +46,10 @@
 	}
 	
 	$wrapper = new EncryptedDatabaseWrapper();
-	$wrapper->insert("base","premium", array("hoster" => "rs", "user" => "massiveloader", "pass" => "a9h4i883bd621hs65", "download_amount" => "0"), array("pass"));
-	$wrapper->insert("base","premium", array("hoster" => "hf", "user" => "758948", "pass" => "0nly4me", "download_amount" => "0"), array("pass"));
-	$wrapper->insert("base","premium", array("hoster" => "mu", "user" => "ecocharli", "pass" => "eco111ilr", "download_amount" => "0"), array("pass"));
-	$wrapper->insert("base","premium", array("hoster" => "nl", "user" => "593068", "pass" => "jpqBIL", "download_amount" => "0"), array("pass"));
+	//$wrapper->insert("base","premium", array("hoster" => "rs", "user" => "massiveloader", "pass" => "a9h4i883bd621hs65", "download_amount" => "0"), array("pass"));
+	//$wrapper->insert("base","premium", array("hoster" => "hf", "user" => "758948", "pass" => "0nly4me", "download_amount" => "0"), array("pass"));
+	//$wrapper->insert("base","premium", array("hoster" => "mu", "user" => "ecocharli", "pass" => "eco111ilr", "download_amount" => "0"), array("pass"));
+	//$wrapper->insert("base","premium", array("hoster" => "nl", "user" => "593068", "pass" => "jpqBIL", "download_amount" => "0"), array("pass"));
 	$wrapper->insert("base","premium", array("hoster" => "ul", "user" => "908465", "pass" => "rippedoff", "download_amount" => "0"), array("pass"));
 
 ?>

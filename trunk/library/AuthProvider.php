@@ -22,12 +22,11 @@
 	
 			$base = new SQLiteDatabase($dbDir.$dbname);
 
-			$query = "SELECT * FROM ".$mytable." WHERE hoster = '".$hoster."'";
+			$query = "SELECT * FROM ".$mytable." WHERE hoster = '".$hoster."' ORDER BY ID DESC";
 			$results = $base->arrayQuery($query, SQLITE_ASSOC);
 	
 			$user = $results[0]["user"];
 			$pass = $crypter->decrypt($results[0]["pass"],$key);
-			
 			
 			return array("user" => $user, "pass" => $pass);
 
@@ -35,9 +34,5 @@
 	
 	}
 	
-	//$ap = new AuthProvider();
-	//var_dump($ap->getAuth("mu"));
-	
-
 
 ?>

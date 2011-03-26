@@ -21,7 +21,7 @@
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		$msg = curl_exec($curl);
 		curl_close ($curl);
-//		debug($msg);	
+
 		return $cookiefile;
 	}
 	
@@ -51,8 +51,6 @@
 	
 	function nl_load($dlFile,$dlLink,$cookiefile)
 	{
-		debug($cookiefile);
-//		debug($dlFile.$dlLink.$cookiefile);
 		$curl = curl_init();	
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);

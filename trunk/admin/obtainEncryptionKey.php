@@ -3,7 +3,7 @@
 	$keyDir = "../safe/";
 	$keyFile = "master.key";
 
-	$pass = "2g8QLzdViOXHwMcdR8Gh4oYDujsYtgLs7A0W98Ru";
+	$pass = "a9h4i883bd621hs65";
 	$salt = "iCHkMFvwC4wZTYZiBiaS";
 
 
