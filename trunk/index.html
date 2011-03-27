@@ -5,11 +5,12 @@
 </head>
 
 <body>
+<script language="JavaScript" src="library/js/prototype.js"></script>
 <script type="text/javascript" src="library/js/DownloadModel.js"></script>
 <script type="text/javascript" src="library/js/SpeedMeter.js"></script>
 <script type="text/javascript">
 
-	var smeter;
+	var smeter = new SpeedMeter();
 
 	var http = createRequestObject();
 	var dlStarted = false;
@@ -77,18 +78,19 @@
 			}
 		}
 
-		setTimeout('statusRequestLoop()',500);
-		var params = "status=1&id="+activeDownload.id;
-		
-		http.open('POST','download.php');
-		http.onreadystatechange = acceptAjaxMessage;
+		new Ajax.Updater(  
+			{ failure: 'errors' },
+			'download.php', 
+			{
+				method:     'post',
+				parameters: { id: activeDownload.id, status: 1  },
+				onSuccess:  function(transport){
+							updateDownloadStatus(transport.responseText);
+						}
+			}
+		);
 
-		//Send the proper header information along with the request
-		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		http.setRequestHeader("Content-length", params.length);
-		http.setRequestHeader("Connection", "close");
-
-		http.send(params);
+		setTimeout('statusRequestLoop()',300);
 	}
 
 	function sendDownloadInfoRequest(link){		
@@ -154,13 +156,45 @@
 	
 	}
 
+	function updateDownloadStatus(response){
+		var args = response.split("@");
+
+		if(args[0] == "suc" && !activeDownload.valuesSet){
+			var tmp = args[4].split("/");
+			activeDownload.valuesSet = true;
+			activeDownload.link = tmp[tmp.length-1]; 
+			
+			if(args[3] > 1024) activeDownload.unit = "KB";
+			if(args[3] > 1024000) activeDownload.unit = "MB";
+			if(args[3] > 1024000000) activeDownload.unit = "GB";
+
+			activeDownload.downloadSize = args[3];
+			
+			if(activeDownload.link.length <= 40)
+				activeDownload.displayLink = activeDownload.link;
+			else
+				activeDownload.displayLink = "..."+activeDownload.link.substring(link.length-37,link.length-1);
+		}
+		
+		if(args[0] == "suc"){
+			activeDownload.progress =  Math.round((args[2]/args[3])*10000) / 100;
+			activeDownload.downloaded = args[2];
+			smeter.mesure(args[2]);				 
+		}
+
+		if(args[0] == "fin"){
+			activeDownload.progress = 100;
+			activeDownload.link = args[2];
+			activeDownload.complete = true 
+		}
+		displayTable();	
+	}
+
+
 	function acceptAjaxMessage(){
 		if(http.readyState == 4){
 			var response = http.responseText;
 			var args = response.split("@");
-			// if(debug) document.getElementById('debugText').innerHTML = response;	
-			//document.write(msgs[i]);
-			
 			
 			if(args[0] == "info"){
 				if(!queue.length){
@@ -183,40 +217,13 @@
 				return;
 			}
 			
-
-			if(args[0] == "suc" && !activeDownload.valuesSet){
-				var tmp = args[4].split("/");
-				activeDownload.valuesSet = true;
-				activeDownload.link = tmp[tmp.length-1]; 
-				
-				if(args[3] > 1024) activeDownload.unit = "KB";
-				if(args[3] > 1024000) activeDownload.unit = "MB";
-				if(args[3] > 1024000000) activeDownload.unit = "GB";
-				activeDownload.downloadSize = args[3];
-				
-				if(activeDownload.link.length <= 40)
-					activeDownload.displayLink = activeDownload.link;
-				else
-					activeDownload.displayLink = "..."+activeDownload.link.substring(link.length-37,link.length-1);
-			}
-			
-			if(args[0] == "suc"){
-				activeDownload.progress =  Math.round((args[2]/args[3])*10000) / 100;
-				activeDownload.downloaded = args[2];
-				smeter.mesure(args[2]);				 
-			}			
-			
-			if(args[0] == "fin"){
-				activeDownload.progress = 100;
-				activeDownload.link = args[2];
-				activeDownload.complete = true 
-			}
 			if(args[0] == "abort"){
 				activeDownload.aborted = true;
 			}
+			
 			if(args[0] == "id"){
 				activeDownload.id = args[1];
-				smeter = new SpeedMeter(2);
+				smeter = new SpeedMeter(4);
 				statusRequestLoop();
 			}
 			
