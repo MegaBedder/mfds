@@ -1,7 +1,6 @@
 <?php
 	//$dlLink ="http://hotfile.com/dl/110921239/506ac05/Thumbs.db.html";
 	// http://hotfile.com/dl/111764296/5e94e5a/nothing.html
-	
 	function hf_fetchCookieFile(){
 		$dir = COOKIE_DIR;
 		
@@ -29,8 +28,17 @@
 	}
 	
 	function hf_getDlFilename($link){
-		$tmp = explode("/",$link);
-		return substr($tmp[6],0,strlen($tmp[6])-5);
+		$apiLink="http://api.hotfile.com/?action=checklinks&links=$link";
+		
+		$curl = curl_init();	
+		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt ($curl, CURLOPT_URL,$apiLink);
+		$tmp=curl_exec($curl);
+		curl_close($curl);
+		$tmp=explode(",",$tmp);
+		if(count($tmp = 1)) return "<404>";
+		return ($tmp[2]);
 	}
 	
 	
