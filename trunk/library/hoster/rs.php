@@ -2,7 +2,7 @@
 	// test-links http://rapidshare.com/files/452549785/0277.JPG
 	// http://rapidshare.com/files/452870539/ulli
 	// http://rapidshare.com/files/452871539/tony
-	
+
 	function rs_getDlLink($link){
 		$auth = new AuthProvider();
 		$authData = $auth->getAuth("rs");
@@ -35,7 +35,18 @@
 
 	function rs_getDlFilename($link){
 		$cache = explode("/",$link);
-		return $cache[count($cache)-1];
+		$fileid = $cache[count($cache)-2];
+		$filename = $cache[count($cache)-1];
+		$apiLink = ("http://api.rapidshare.com/cgi-bin/rsapi.cgi?sub=checkfiles_v1&files=$fileid&filenames=$filename");
+		
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($curl, CURLOPT_URL,$apiLink);
+		$data = curl_exec ($curl);	
+		curl_close($curl);
+		$data=explode(",",$data);
+		if(strtolower($data[0] = "error")) return "<404>";		
+		return $data[count($data)-1];
 	}
 
 	function rs_load($dlFile,$dlLink,$cookiefile){
