@@ -4,9 +4,9 @@
 
 	<table>
 	<tr>
-	<td width="300"> Database: <input type="text" id="baseTextField" name="basename"> </td>
+	<td width="330"> Database: <input type="text" id="baseTextField" name="basename"> </td>
 	<td> Table: <select id="possibleTables" name="tablename"> <option>--All--</option></select> </td>
-	<td width="200"> <input type="submit" value="select"> </td>
+	<td width="200"> <input name="select" type="submit" value="select"> </td>
 	
 	<td> <input type="text" name="query"> </td>
 	<td> <input type="submit" value="send query"> </td>
@@ -29,6 +29,7 @@
 	}
 
 	function updateDropdown(args){
+		if(args == "") return;
 		args = args.split(",");	
 
 		for( var i in args){
@@ -53,11 +54,7 @@
 <?php
 	session_start();
 
-	if( isset( $_POST["basename"] ) && $_POST["basename"] != "" ){
-		$_SESSION["basename"] = $_POST["basename"];
-	}
-
-	if( isset( $_SESSION["basename"] ) ){
+	function updateNavigation(){
 		$base = new SQLiteDatabase($_SESSION["basename"]);
 		$res = $base->arrayQuery("SELECT * FROM sqlite_master WHERE type='table'", SQLITE_ASSOC);
 		
@@ -69,20 +66,30 @@
 		echo "<script type='text/javascript'> updateDropdown('".implode($names,",")."'); </script>";	
 	}
 
+	if( isset( $_POST["basename"] ) && $_POST["basename"] != "" ){
+		$_SESSION["basename"] = $_POST["basename"];
+	}
+
+	if( isset( $_SESSION["basename"] ) && !( isset( $_POST["query"] ) && $_POST["query"] != "" ) ){
+		updateNavigation();
+	}
+
 	if( isset( $_POST["tablename"] ) ){
 		if( $_POST["tablename"] != "--All--" ){
 			$_SESSION["tablename"] = $_POST["tablename"];
-			echo "<script type='text/javascript'> selectDropdown('".$_SESSION["tablename"]."'); </script>";	
 		}
 		else 
 			unset( $_SESSION["tablename"] );
+	}
+
+	if( isset( $_SESSION["tablename"] ) ){
+			echo "<script type='text/javascript'> selectDropdown('".$_SESSION["tablename"]."'); </script>";	
 	}
 
 	if( isset( $_POST["query"] ) && $_POST["query"] != "" ){
 		$_SESSION["query"] = $_POST["query"];
 		unset( $_SESSION["tablename"] );
 	}
-
 ?>
 
 

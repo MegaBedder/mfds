@@ -2,6 +2,19 @@
 	include("navigation.php");
 	require_once("ArrayTable.php");
 
+	require_once("../../library/Cryptastic.php");
+	$masterKeyFile = "../../safe/master.key";
+
+	if( isset( $_POST["AT"] ) )
+	{
+		addTable();
+	}
+
+	if( isset( $_POST["drop"] ) )
+	{
+		removeTable();
+	}
+
 	if( isset( $_POST["ATI_DELETE"] ) )
 	{
 		delete();
@@ -58,6 +71,11 @@
 	}
 	
 	function save(){
+		global $masterKeyFile;
+		
+		$crypter = new Cryptastic();
+		$encryptionKey = file_get_contents($masterKeyFile);
+
 		$base = new SQLiteDatabase($_SESSION["basename"]);
 		$query = "INSERT INTO ".$_SESSION["tablename"]."(".$_POST["ATI_KEYS"].") VALUES(";
 
@@ -66,7 +84,14 @@
 
 		foreach( $keys as $key){
 			$i--;
-			$query .= $_POST["ATI_".$key] == ""	? "null" : "'".SQLite3::escapeString($_POST["ATI_".$key])."'";
+
+			if( isset( $_POST["ATI_".$key."_ENCODE"] ) ){
+				$query .= $_POST["ATI_".$key] == ""	? "null" : "'".SQLite3::escapeString( $crypter->encrypt( $_POST["ATI_".$key], $encryptionKey ) )."'";
+				echo $crypter->encrypt($_POST["ATI_".$key]);
+			}
+			else
+				$query .= $_POST["ATI_".$key] == ""	? "null" : "'".SQLite3::escapeString($_POST["ATI_".$key])."'";
+			
 			$query .= $i == 0 ? ")" : ",";
 		}
 		$base->query( $query, SQLITE_ASSOC );
@@ -91,11 +116,49 @@
 		$base->query($query);
 	}
 	
+	function addTable(){
+		$names = explode( ",", $_POST["AT_names"] );
+		$types = explode( ",", $_POST["AT_types"] );
+		$query = "CREATE TABLE ".$_POST["AT_tablename"]."(";
+		
+		if( count($names) != count($types) ){
+			echo "count of names and types mimatch!";
+			return;
+		}
+		
+		foreach($names as $i => $name){
+			$query .= "'".$name."' ".$types[$i];
+			$query .= $i == count($names)-1 ? ")" : ",";
+		}
+		
+		$base = new SQLiteDatabase($_SESSION["basename"]);
+		$base->query($query);
+		$_SESSION["tablename"] = $_POST["AT_tablename"];
+
+		echo "<meta http-equiv='refresh' content='0'>";
+		flush();
+	}
+	
+	function removeTable(){
+		$base = new SQLiteDatabase($_SESSION["basename"]);
+		$base->query("DROP TABLE ".$_SESSION["tablename"]);
+		unset( $_SESSION["tablename"] );
+		
+		echo "<meta http-equiv='refresh' content='0'>";
+		flush();
+	}
+	
 	function showBase( $basename ){
 		echo "<h3> Contents of Database: ".$basename."</h3>";
 		
 		$at = new ArrayTable("SELECT * FROM sqlite_master WHERE type='table'");
-		echo $at->getTable();				
+		echo $at->getTable();
+		echo "<br><br><hr><b>Add Table:</b><br><br><form method='post' action='".$_SERVER['PHP_SELF']."'><table>";
+		echo "<tr><td>Table-Name:</td><td> <input type='text' name='AT_tablename'></td></tr>";
+		echo "<tr><td>Column-Names:</td><td> <input type='text' name='AT_names'></td></tr>";
+		echo "<tr><td>Column-Types: </td><td><input type='text' name='AT_types'></td></tr>";
+		echo "</table>";
+		echo "<br>seperate names and types with comma!<br><br><input type=submit value='add table' name='AT'></form>";				
 	}
 
 	function showTable( $basename, $tablename ){
@@ -112,7 +175,9 @@
 
 		echo "<h3>Executed Query:</h3>";			
 		echo "<b>Query:</b> \"".$query."\"<br><br>";
-		echo "<b>Result:</b><br>".$at->getTable();			
+		echo "<b>Result:</b><br>".$at->getTable();
+		
+		updateNavigation();			
 	}
 	
 ?>
