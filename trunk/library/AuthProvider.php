@@ -1,6 +1,5 @@
 <?php
 	$masterKeyFile = "safe/master.key";
-	
 	require_once("Cryptastic.php");
 
 	class AuthProvider{

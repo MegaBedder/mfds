@@ -70,11 +70,11 @@
 	}
 	if(isset($_POST["link"]) && isset($_POST["init"])){
 		$id = createDownloadId($_POST["link"]);
-
-		if(!$id) 
-			die("error");
-		else
-			die("id"."@".$id."@".$_POST["link"]);			
+		
+		echo "id"."@".$id."@".$_POST["link"];
+		flush();
+		ob_flush();
+		ob_flush_end();
 	}
 	
 	if(isset($_POST["id"]) && isset($_POST["fin"])){
@@ -127,7 +127,10 @@
 			$globalID = $id;
 			$file = fopen($filename, "w");
 			fclose($file);
-
+			echo("started");
+			flush();
+			ob_flush();
+			ob_end_flush();
 			startDownload($args[1]);
 		}
 		else if($args[0] == $args[1]){

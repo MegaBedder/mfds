@@ -9,8 +9,9 @@
 		curl_setopt ($curlHandle, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt ($curlHandle, CURLOPT_URL,$dlLink);		
 		curl_exec ($curlHandle);
+		if(curl_getinfo($curlHandle, CURLINFO_HTTP_CODE) == 404) return "<404>";
 		curl_close($curlHandle);	
-		if(curl_getinfo($curlHandle, CURLINFO_HTTP_CODE) === 404) return "<404>";
+
 		$filename = $buffer[count($buffer)-1]; 
 	
 		return $filename;

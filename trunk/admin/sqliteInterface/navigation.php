@@ -1,3 +1,5 @@
+<?php session_start() ?>
+
 <html>
 <link rel="stylesheet" type="text/css" href="../../style/style.css">
 <form method="post" action="overview.php">
@@ -52,8 +54,6 @@
 </script>
 
 <?php
-	session_start();
-
 	function updateNavigation(){
 		$base = new SQLiteDatabase($_SESSION["basename"]);
 		$res = $base->arrayQuery("SELECT * FROM sqlite_master WHERE type='table'", SQLITE_ASSOC);
@@ -67,6 +67,7 @@
 	}
 
 	if( isset( $_POST["basename"] ) && $_POST["basename"] != "" ){
+		if( $_POST["basename"] != $_SESSION["basename"] ) $_POST["tablename"] = "--All--";
 		$_SESSION["basename"] = $_POST["basename"];
 	}
 

@@ -1,6 +1,6 @@
 <?php
 
-	class cryptastic {
+	class Cryptastic {
 
 		/** Encryption Procedure
 		 *

@@ -90,7 +90,7 @@
 			}
 		);
 
-		setTimeout('statusRequestLoop()',300);
+		setTimeout('statusRequestLoop()',500);
 	}
 
 	function sendDownloadInfoRequest(link){		
@@ -158,6 +158,8 @@
 
 	function updateDownloadStatus(response){
 		var args = response.split("@");
+
+		console.debug(response);
 
 		if(args[0] == "suc" && !activeDownload.valuesSet){
 			var tmp = args[4].split("/");

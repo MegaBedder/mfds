@@ -73,25 +73,39 @@
 	function save(){
 		global $masterKeyFile;
 		
+		$timecolumn = "%%%%%%%%";
+		
 		$crypter = new Cryptastic();
 		$encryptionKey = file_get_contents($masterKeyFile);
 
 		$base = new SQLiteDatabase($_SESSION["basename"]);
 		$query = "INSERT INTO ".$_SESSION["tablename"]."(".$_POST["ATI_KEYS"].") VALUES(";
 
+		$columninfos = $base->arrayQuery("PRAGMA table_info(".$_SESSION["tablename"].")");			
+		
+		foreach($columninfos as $info){
+			if( preg_match("/date/i",$info["type"]) ){
+				$timecolumn = $info["name"];
+				break;
+			}
+		}
+		
 		$keys = explode(",", $_POST["ATI_KEYS"]);
 		$i = count($keys);
+		
 
 		foreach( $keys as $key){
 			$i--;
 
 			if( isset( $_POST["ATI_".$key."_ENCODE"] ) ){
 				$query .= $_POST["ATI_".$key] == ""	? "null" : "'".SQLite3::escapeString( $crypter->encrypt( $_POST["ATI_".$key], $encryptionKey ) )."'";
-				echo $crypter->encrypt($_POST["ATI_".$key]);
 			}
-			else
+			else if( $key == $timecolumn){
+				$query .= "'".SQLite3::escapeString( date( "D j.n.Y G\-i\-s" ) )."'";
+			}
+			else{
 				$query .= $_POST["ATI_".$key] == ""	? "null" : "'".SQLite3::escapeString($_POST["ATI_".$key])."'";
-			
+			}
 			$query .= $i == 0 ? ")" : ",";
 		}
 		$base->query( $query, SQLITE_ASSOC );
@@ -171,11 +185,13 @@
 	}
 	
 	function showQuery( $query ) {
-		$at = new ArrayTable($query);
-
+		//$at = new ArrayTable($query);
+		$err = "";
+		$base = new SQLiteDatabase($_SESSION["basename"]);
+		$base->query( $query, SQLITE_ASSOC, $err); 
 		echo "<h3>Executed Query:</h3>";			
 		echo "<b>Query:</b> \"".$query."\"<br><br>";
-		echo "<b>Result:</b><br>".$at->getTable();
+		echo "<b>Result:</b><br>".( $err == "" ? "Success" : $err );
 		
 		updateNavigation();			
 	}

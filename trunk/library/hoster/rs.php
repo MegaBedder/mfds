@@ -45,8 +45,9 @@
 		$data = curl_exec ($curl);	
 		curl_close($curl);
 		$data=explode(",",$data);
-		if(strtolower($data[0] = "error")) return "<404>";		
-		return $data[count($data)-1];
+		
+		if(strtolower($data[2] == "0")) return "<404>";		
+		return $data[1];
 	}
 
 	function rs_load($dlFile,$dlLink,$cookiefile){

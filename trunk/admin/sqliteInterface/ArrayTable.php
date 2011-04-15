@@ -22,6 +22,7 @@
 		protected $inputFields = false;
 		protected $checkboxes = false;
 		
+		private $readOnlyFields = array("id","timestamp");
 		
 		function escapeJavaScriptText($string){
 			return strtr($string, array('\\'=>'\\\\',"'"=>"\\'",'"'=>'\\"',"\r"=>'\\r',"\n"=>'\\n','</'=>'<\/'));
@@ -114,8 +115,9 @@
 			if( $this->inputFields ){
 				$table .= "<tr>";
 				foreach( $keys as $key ){
-					$table .= "<td><input type='text' name='ATI_".$key."'>";
-					$table .= "</td>";	
+					$table .= "<td><input type='text' name='ATI_".$key."' ";
+					$table .= preg_match( "/".implode($this->readOnlyFields,"|")."/i", $key) ? "readonly" : "";
+					$table .= "></td>";	
 				}
 				
 				if($this->checkboxes) $table .= "<td>&nbsp;</td>";	
